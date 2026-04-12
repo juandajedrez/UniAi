@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-from .branch_config import DEBUG as local_debug
+from .branch_config import *
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q=i=u1!*x!=g4e#pxa%_@vdwz+)c1oc!4iovld9p5lymfhnvx6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = local_debug
+#DEBUG = local_debug
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -38,12 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app_admin',
-    'app_advisories',
+    'app_class',
     'app_ai',
     'app_calendar',
     'app_chat',
     'app_notifications',
     'app_users',
+    'Django',
 ]
 
 MIDDLEWARE = [
@@ -121,4 +122,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+
+# Ruta al login de tu app users
+LOGIN_URL = '/users/auth/'
+
+# Ruta al home después de iniciar sesión
+LOGIN_REDIRECT_URL = '/home/'

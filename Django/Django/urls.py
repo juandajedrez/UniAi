@@ -1,27 +1,16 @@
-"""
-URL configuration for Django project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-
+from . import views
 urlpatterns = [
-    path("admin/", admin.site.urls),          # Panel de administración
-    path("users/", include("users.urls")),    # Rutas de la app users
-    path("advisories/", include("advisories.urls")),  # Rutas de la app advisories
-    path("chat/", include("chat.urls")),      # Rutas de la app chat
-    path("calendar/", include("calendar.urls")),  # Rutas de la app calendar
-    path("notifications/", include("notifications.urls")),  # Rutas de la app notifications
+    path("admin/panel/", admin.site.urls),          # Panel de administración
+    path("admin/", include("app_admin.urls")),          # Panel de administración
+    path("users/", include("app_users.urls")),    # Rutas de la app users
+    path("class/", include("app_class.urls")),  # Rutas de la app class
+    path("chat/", include("app_chat.urls")),      # Rutas de la app chat
+    path("calendar/", include("app_calendar.urls")),  # Rutas de la app calendar
+    path("notifications/", include("app_notifications.urls")),  # Rutas de la app notifications
+
+    path("home/", views.home_view, name="home"),
 ]
+#handler404 = "Django.views.custom_page_not_found"
+

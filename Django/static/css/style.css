@@ -1,0 +1,51 @@
+/* style.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arvo', serif;
+    background: #ffffff; /* fondo blanco */
+    color: #1e293b;      /* texto gris oscuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.home-container {
+    background: #f9fafb; /* gris muy claro para diferenciar del fondo */
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    max-width: 500px;
+    width: 90%;
+}
+
+.home-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #065f46; /* verde oscuro elegante */
+}
+
+.home-container p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    color: #475569; /* gris azulado para contraste */
+}
+
+.logout-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #065f46; /* verde oscuro */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #2563eb; /* azul intenso al pasar el mouse */
+    transform: scale(1.05);
+}
