@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore specific Python file
+Branch_config.py
+
+
 # Distribution / packaging
 .Python
 build/
@@ -138,6 +142,10 @@ celerybeat.pid
 .env
 .envrc
 .venv
+.dev
+.main
+.bugs
+.test
 env/
 venv/
 ENV/
