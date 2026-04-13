@@ -1,5 +1,5 @@
 from django.db import models
-from app_users.models import Teacher,Student
+from django.contrib.auth.models import User
 # Create your models here.
 
 # ==========================
@@ -21,14 +21,14 @@ class Classroom(models.Model):
         return f"Aula {self.roomNumber} ({self.location})"
 
 class TeacherCourse(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey("app_users.Teacher", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.teacher} dicta {self.course}"
 
 class StudentCourse(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey("app_users.Student", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -40,3 +40,19 @@ class ClassroomCourse(models.Model):
 
     def __str__(self):
         return f"{self.course} en {self.classroom}"
+
+
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10)
+    director = models.ForeignKey(User, on_delete=models.PROTECT)
+    def __str__(self):
+        return f"{self.name}"
+    
+
+class Program(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10)
+    director = models.ForeignKey(User, on_delete=models.PROTECT)    
+    def __str__(self):
+        return f"{self.name}"
