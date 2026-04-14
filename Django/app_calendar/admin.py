@@ -1,24 +1,20 @@
 from django.contrib import admin
-from .models import Calendar, Event, CalendarEvent, CourseEvent
+from .models import Event, Calendar
 
-@admin.register(Calendar)
-class CalendarAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "timeZone")
-    search_fields = ("user__username", "timeZone")
-
+# --- Admin para Event ---
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "startDateTime", "endDateTime", "location", "status", "createdBy")
+    list_display = ("title", "startDateTime", "endDateTime", "location", "status", "createdBy")
     search_fields = ("title", "description", "location", "createdBy__username")
-    list_filter = ("status", "startDateTime", "endDateTime")
-    filter_horizontal = ("participants",)  # interfaz más cómoda para seleccionar usuarios
+    list_filter = ("status", "location", "startDateTime", "endDateTime")
 
-@admin.register(CalendarEvent)
-class CalendarEventAdmin(admin.ModelAdmin):
-    list_display = ("id", "calendar", "event")
-    search_fields = ("calendar__user__username", "event__title")
+# --- Admin para Calendar ---
+@admin.register(Calendar)
+class CalendarAdmin(admin.ModelAdmin):
+    list_display = ("user", "timeZone", "firstDay", "get_events")
+    search_fields = ("user__username", "timeZone")
+    list_filter = ("timeZone", "firstDay")
 
-@admin.register(CourseEvent)
-class CourseEventAdmin(admin.ModelAdmin):
-    list_display = ("id", "course", "event")
-    search_fields = ("course__name", "event__title")
+    def get_events(self, obj):
+        return ", ".join([e.title for e in obj.events.all()])
+    get_events.short_description = "Eventos"
