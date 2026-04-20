@@ -1,0 +1,27 @@
+{% extends 'home.html' %}
+
+{% block title %}Notificación{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <!-- Encabezado tipo asunto -->
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Notificación</h3>
+        </div>
+
+        <!-- Cuerpo del mensaje -->
+        <div class="card-body">
+            <div class="alert alert-light border rounded p-3">
+                <p class="mb-0" style="white-space: pre-line;">{{ notification.content }}</p>
+            </div>
+        </div>
+
+        <!-- Pie con metadatos -->
+        <div class="card-footer text-muted d-flex justify-content-between">
+            <small>Fecha: {{ notification.timestamp }}</small>
+            <a href="{% url 'notifications_list' %}" class="btn btn-outline-secondary btn-sm">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

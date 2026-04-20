@@ -14,6 +14,7 @@ class State(models.TextChoices):
 
 class Chat(models.Model):
     icon = models.TextField()
+    name = models.TextField(default="Chat")
     description = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
     users = models.ManyToManyField(User, related_name="user_chats")
@@ -27,6 +28,7 @@ class Message(models.Model):
     timeStamp = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(User, on_delete=models.PROTECT)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    read = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Msg {self.id} by {self.sender}"

@@ -11,6 +11,7 @@ urlpatterns = [
     path("notifications/", include("app_notifications.urls")),  # Rutas de la app notifications
 
     path("home/", views.home_view, name="home"),
+    path("", views.blank_view),
 ]
 #handler404 = "Django.views.custom_page_not_found"
 

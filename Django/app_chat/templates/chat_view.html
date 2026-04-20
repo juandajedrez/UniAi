@@ -1,0 +1,109 @@
+{% extends 'home.html' %}
+{% block title %}Chat {{ chat.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Encabezado tipo WhatsApp -->
+    <div class="d-flex align-items-center bg-success text-white p-2 rounded-top">
+        <!-- Flecha hacia atrás -->
+        <a href="{% url 'chat_list' %}" class="text-white me-3">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem;"></i>
+        </a>
+
+        <!-- Icono dinámico -->
+        <div class="me-2">
+            {% if chat.users.count > 2 %}
+                <!-- Ícono del chat -->
+                <img src="{{ chat.icon }}" alt="Icono del chat"
+                    class="rounded-circle border border-white"
+                    style="width: 40px; height: 40px; object-fit: cover;">
+            {% else %}
+                <!-- Foto del otro usuario -->
+                {% for u in chat.users.all %}
+                    {% if u != user %}
+                        <img src="{{ u.profile.photo }}" alt="{{ u.first_name }}"
+                            class="rounded-circle border border-white"
+                            style="width: 40px; height: 40px; object-fit: cover;">
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Nombre del chat -->
+        <div class="flex-grow-1">
+            {% if chat.users.count > 2 %}
+                <h5 class="mb-0">{{ chat.description|default:"Chat sin nombre" }}</h5>
+            {% else %}
+                {% for u in chat.users.all %}
+                    {% if u != user %}
+                        <h5 class="mb-0">{{ u.first_name }} {{ u.last_name }} ({{ u.profile.program }})</h5>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <!-- Lista de integrantes -->
+            {% if chat.users.count > 2 %}
+                <small class="text-light">
+                    {% for u in chat.users.all %}
+                        {% if u == user %}
+                            {% if not forloop.last %}Tú,{% else %}Tú{% endif %}
+                        {% else %}
+                            {% if not forloop.last %}{{ u.first_name }} {{ u.last_name }},{% else %}{{ u.first_name }} {{ u.last_name }}{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </small>
+            {% endif %}
+        </div>
+
+        <!-- Botón de detalles -->
+        <a href="{% url 'chat_detail' chat.id %}" class="text-white ms-3">
+            <i class="bi bi-info-circle" style="font-size: 1.5rem;"></i>
+        </a>
+    </div>
+
+
+    <!-- Contenedor principal del chat -->
+    <div class="card shadow" style="height: 80vh; display: flex; flex-direction: column;">
+        
+        <!-- Mensajes -->
+        <div class="card-body" style="flex: 1; overflow-y: auto; background-color: #e5ddd5;">
+            {% for msg in messages %}
+            <div class="d-flex {% if msg.sender == user %}justify-content-end{% else %}justify-content-start{% endif %} mb-2">
+                <div class="p-2 rounded" 
+                     style="max-width: 70%; 
+                            {% if msg.sender == user %}
+                                background-color: #dcf8c6;
+                                text-align: right;
+                            {% else %}
+                                background-color: #ffffff;
+                                text-align: left;
+                            {% endif %}">
+                    <p class="mb-1">{{ msg.content }}</p>
+                    <small class="text-muted">
+                        {{ msg.timeStamp|date:"H:i" }}
+                        {% if msg.read %}
+                            <i class="bi bi-check" style="color: #25d366;"></i>
+                        {% else %}
+                            <i class="bi bi-check" style="color: #999;"></i>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">No hay mensajes en este chat.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Input fijo abajo -->
+        <div class="card-footer bg-white" style="position: sticky; bottom: 0;">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="content" class="form-control" placeholder="Escribe un mensaje...">
+                    <button class="btn btn-success" type="submit">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
