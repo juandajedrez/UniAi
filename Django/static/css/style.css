@@ -1,25 +1,60 @@
-/* style.css */
-
 body {
     margin: 0;
-    padding: 0;
-    font-family: 'Arvo', serif;
-    background: #ffffff; /* fondo blanco */
-    color: #1e293b;      /* texto gris oscuro */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding-top: 56px;
+    font-family: 'Jost', sans-serif;
+    /*background: linear-gradient(
+        to bottom,
+        rgba(3, 71, 39, 1),
+        rgba(20, 82, 60, 0.95),
+        rgba(28, 61, 28, 0.9)
+    );
+    min-height: 100vh;
+    color: #f0fff0; /* texto claro para contraste */
+}
+#sidebar {
+  width: 60px;
+  transition: width 0.3s;
+  overflow-x: hidden;
 }
 
+#sidebar span {
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+#sidebar:hover {
+  width: 200px;
+}
+
+#sidebar:hover span {
+  opacity: 1;
+}
+
+/* Mostrar dropdown al pasar el mouse */
+.nav-item.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.nav-link.active i,
+
+.nav-link.active span {
+  color: #51fd0d; /* verde oscuro */
+  font-weight: bold;
+}
+.nav-link {
+    color: #fff !important;
+}
+/* Contenedor principal */
 .home-container {
-    background: #f9fafb; /* gris muy claro para diferenciar del fondo */
+    background: rgba(255, 255, 255, 0.9); /* fondo blanco semitransparente para contraste */
     padding: 40px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
     max-width: 500px;
     width: 90%;
+    margin: 40px auto;
 }
 
 .home-container h1 {
@@ -27,17 +62,40 @@ body {
     margin-bottom: 20px;
     color: #065f46; /* verde oscuro elegante */
 }
+.home-container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #ffffff; /* verde oscuro elegante */
+}
 
 .home-container p {
     font-size: 1.1rem;
     margin-bottom: 30px;
-    color: #475569; /* gris azulado para contraste */
+    color: #333; /* texto oscuro dentro del contenedor claro */
+}
+
+/* Forzar contraste en el container */
+.container {
+    color: #f0fff0 !important;
+}
+
+.container h1 {
+    color: #ffffff !important; /* blanco puro para títulos */
+}
+.container h2 {
+    color: #ffffff !important; /* blanco puro para títulos */
+}
+.container h5 {
+    color: #000000 !important; /* blanco puro para títulos */
+}
+.container p {
+    color: #000000 !important; /* verde muy claro para párrafos */
 }
 
 .logout-btn {
     display: inline-block;
     padding: 12px 24px;
-    background: #065f46; /* verde oscuro */
+    background: #065f46;
     color: #fff;
     text-decoration: none;
     border-radius: 8px;
@@ -46,6 +104,6 @@ body {
 }
 
 .logout-btn:hover {
-    background: #2563eb; /* azul intenso al pasar el mouse */
+    background: #2563eb;
     transform: scale(1.05);
 }

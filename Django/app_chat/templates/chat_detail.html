@@ -1,0 +1,61 @@
+{% extends 'home.html' %}
+{% block title %}Detalles del Chat {{ chat.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <!-- Encabezado verde -->
+        <div class="card-header bg-success text-white d-flex align-items-center">
+            <a href="{% url 'chat_view' chat.id %}" class="text-white me-3">
+                <i class="bi bi-arrow-left" style="font-size: 1.5rem;"></i>
+            </a>
+            <h3 class="mb-0">Info del Chat</h3>
+        </div>
+
+        <div class="card-body text-center">
+            <!-- Ícono o foto grande -->
+            {% if chat.users.count > 2 %}
+                <img src="{{ chat.icon }}" alt="Icono del chat"
+                     class="rounded-circle border border-success mb-3"
+                     style="width: 120px; height: 120px; object-fit: cover;">
+                <h4 class="mb-1">{{ chat.description|default:"Chat sin nombre" }}</h4>
+            {% else %}
+                {% for u in chat.users.all %}
+                    {% if u != user %}
+                        <img src="{{ u.profile.photo}}" alt="{{ u.first_name }}"
+                             class="rounded-circle border border-success mb-3"
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                        <h4 class="mb-1">{{ u.first_name }} {{ u.last_name }} ({{ u.profile.program }})</h4>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <p class="text-muted">Estado: {{ chat.get_state_display }}</p>
+        </div>
+
+        <!-- Lista de integrantes -->
+        <div class="card-footer bg-light">
+            <h5 class="mb-3">Integrantes</h5>
+            <ul class="list-group list-group-flush">
+                {% for u in chat.users.all %}
+                <li class="list-group-item d-flex align-items-center">
+                    <img src="{{ u.profile.photo }}" alt="{{ u.first_name }}"
+                         class="rounded-circle me-3"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    <span>
+                        {% if u == user %}
+                            Tú
+                        {% else %}
+                            {{ u.first_name }} {{ u.last_name }}
+                        {% endif %}
+                        <small class="text-muted"> ({{ u.username }})</small>
+                    </span>
+                </li>
+                {% empty %}
+                <li class="list-group-item">No hay usuarios en este chat.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

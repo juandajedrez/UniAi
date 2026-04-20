@@ -1,55 +1,42 @@
 from django.contrib import admin
-from .models import Course, Classroom, TeacherCourse, StudentCourse, ClassroomCourse, Department, Program
+from .models import Classroom, Course, Department, Program
 
-# ==========================
-# CONFIGURACIONES ADMIN
-# ==========================
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
-    search_fields = ("name",)
-    ordering = ("name",)
-
-
+# --- Admin para Classroom ---
 @admin.register(Classroom)
 class ClassroomAdmin(admin.ModelAdmin):
-    list_display = ("roomNumber", "capacity", "location")
+    list_display = ("roomNumber", "location", "capacity")
     search_fields = ("roomNumber", "location")
     list_filter = ("location",)
 
+# --- Admin para Course ---
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "get_classrooms", "get_teachers", "get_students")
+    search_fields = ("name", "description", "teachers__user__username", "students__user__username")
+    list_filter = ("classrooms", "teachers__role", "students__role")
 
-@admin.register(TeacherCourse)
-class TeacherCourseAdmin(admin.ModelAdmin):
-    list_display = ("teacher", "course")
-    search_fields = ("teacher__user__username", "course__name")
-    list_filter = ("course",)
+    def get_classrooms(self, obj):
+        return ", ".join([c.roomNumber for c in obj.classrooms.all()])
+    get_classrooms.short_description = "Aulas"
 
+    def get_teachers(self, obj):
+        return ", ".join([t.user.username for t in obj.teachers.all()])
+    get_teachers.short_description = "Docentes"
 
-@admin.register(StudentCourse)
-class StudentCourseAdmin(admin.ModelAdmin):
-    list_display = ("student", "course")
-    search_fields = ("student__user__username", "course__name")
-    list_filter = ("course",)
+    def get_students(self, obj):
+        return ", ".join([s.user.username for s in obj.students.all()])
+    get_students.short_description = "Estudiantes"
 
-
-@admin.register(ClassroomCourse)
-class ClassroomCourseAdmin(admin.ModelAdmin):
-    list_display = ("course", "classroom")
-    search_fields = ("course__name", "classroom__roomNumber")
-    list_filter = ("classroom",)
-
-
+# --- Admin para Department ---
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ("name", "code", "director")
     search_fields = ("name", "code", "director__username")
-    ordering = ("name",)
+    list_filter = ("code",)
 
-
+# --- Admin para Program ---
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
     list_display = ("name", "code", "director")
     search_fields = ("name", "code", "director__username")
-    ordering = ("name",)
-
+    list_filter = ("code",)

@@ -1,53 +1,87 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 # ==========================
-# USUARIOS
+# USERS
 # ==========================
-
-
-class SocialMedia(models.Model):
-    name = models.CharField(max_length=25)
-    link = models.CharField(max_length=100)
-    def __str__(self):
-        return f"Nombre: {self.name}"
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE,null=True, blank=True)
-    birthday = models.DateField(
-        verbose_name="Fecha de nacimiento",
-        help_text="Ingrese la fecha en formato AAAA-MM-DD",null=True, blank=True
+    ROLE_CHOICES = [
+        ("TEACHER", "Profesor"),
+        ("ADMIN", "Administrativo"),
+        ("STUDENT", "Estudiante"),
+        ("IA","IA"),
+    ]
+    photo = models.TextField(default="https://img.freepik.com/vector-premium/icono-usuario-establece-perfil-social-simbolo-vectorial-avatar-persona-cuenta-signo-web_268104-14523.jpg?semt=ais_hybrid&w=740&q=80")
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        verbose_name="Usuario"
     )
-    department = models.ForeignKey("app_class.Department", on_delete=models.PROTECT,null=True, blank=True)
-    program = models.ForeignKey("app_class.Program", on_delete=models.PROTECT,null=True, blank=True)
+    birthday = models.DateField(
+        null=True, 
+        blank=True, 
+        verbose_name="Fecha de nacimiento"
+    )
+    department = models.ForeignKey(
+        "app_class.Department", 
+        on_delete=models.PROTECT,
+        verbose_name="Facultad"
+    )
+    program = models.ForeignKey(
+        "app_class.Program", 
+        on_delete=models.PROTECT,
+        verbose_name="Programa"
+    )
+    role = models.CharField(
+        max_length=20, 
+        choices=ROLE_CHOICES,
+        verbose_name="Rol"
+    )
+    semester = models.PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(15)], 
+        null=True, 
+        blank=True,
+        verbose_name="Semestre"
+    )
+
+    class Meta:
+        verbose_name = "Perfil"
+        verbose_name_plural = "Perfiles"
 
     def __str__(self):
-        return f"{self.user.username} ({self.department} - {self.program})"
+        return f"{self.user.username} ({self.get_role_display()})"
+
     
-class SocialMediaProfile(models.Model):
-    socialMedia = models.ForeignKey(SocialMedia, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    def __str__(self):
-        return f"Red social: {self.socialMedia.name} - usuario: {self.profile.user.username}"
-    
-class Teacher(models.Model):
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE,null=True, blank=True)
+class SocialMedia(models.Model):
+    name = models.CharField(
+        max_length=25, 
+        blank=True, 
+        null=True,
+        verbose_name="Nombre de la red social"
+    )
+    link = models.URLField(
+        blank=True, 
+        null=True,
+        verbose_name="Enlace"
+    )
+    profile = models.ForeignKey(
+        Profile, 
+        on_delete=models.PROTECT,
+        verbose_name="Perfil asociado"
+    )
+
+    class Meta:
+        verbose_name = "Red social"
+        verbose_name_plural = "Redes sociales"
 
     def __str__(self):
-        return f"Profesor: {self.profile.user.username}"
+        return f"{self.name or 'Sin nombre'}"
 
-class Administrative(models.Model):
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE,null=True, blank=True)
 
-    def __str__(self):
-        return f"Administrativo: {self.profile.user.username}"
+        
 
-class Student(models.Model):
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE,null=True, blank=True)
-    semester = models.PositiveIntegerField()
 
-    def __str__(self):
-        return f"Estudiante: {self.profile.user.username} - Semestre {self.semester}"
 
 
 

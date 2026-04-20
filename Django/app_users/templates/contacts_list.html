@@ -1,0 +1,58 @@
+{% extends 'home.html' %}
+
+{% block title %}Contactos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Barra de búsqueda -->
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Buscar contactos...">
+            <button class="btn btn-outline-success" type="submit">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+
+    </form>
+
+    <!-- Lista de contactos estilo WhatsApp -->
+    <div class="list-group">
+                <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h2 class="mb-0">Usuarios</h2>
+            </div>
+        </div>
+        {% for profile in profiles %}
+        <div class="list-group-item d-flex align-items-center justify-content-between">
+            
+            <!-- Foto del contacto -->
+            <div class="d-flex align-items-center">
+                <img src="{{ profile.photo }}" alt="{{ profile.user.first_name }}"
+                     class="rounded-circle me-3"
+                     style="width: 50px; height: 50px; object-fit: cover;">
+                
+                <!-- Información del contacto -->
+                <div>
+                    <h5 class="mb-0">{{ profile.user.first_name }} {{ profile.user.last_name }}</h5>
+                    <small class="text-muted">
+                        {{ profile.department.name }} · {{ profile.program.name }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Botones alineados a la derecha -->
+            <div class="text-end">
+                <a href="{% url 'contact_chat' profile.id %}" class="btn btn-sm btn-success">
+                    <i class="bi bi-chat-dots"></i> Contactar
+                </a>
+                <a href="{% url 'view_contact_detail' profile.id %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-person"></i> Ver perfil
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">No se encontraron contactos.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
