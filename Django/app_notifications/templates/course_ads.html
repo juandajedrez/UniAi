@@ -1,0 +1,27 @@
+{% extends "home.html" %}
+{% block title %}Anuncios del Curso{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-3">Anuncios de {{ course.name }}</h2>
+        </div>
+    </div>
+
+    <div class="list-group">
+        {% for ad in ads %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+                <p>{{ ad.content }}</p>
+                <small class="text-muted">Publicado el {{ ad.timestamp|date:"d/m/Y H:i" }}</small>
+            </span>
+        </li>
+        {% empty %}
+        <p>No hay anuncios activos en este curso.</p>
+        {% endfor %}
+    </div>
+    {% if user.profile.role == 'TEACHER' %}
+        <a href="{% url 'create_course_ad' course.id %}" class="btn btn-success mb-3">Nuevo anuncio</a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -26,11 +26,16 @@ def auth_view(request):
                 if user is not None:
                     if user.is_active:
                         login(request, user)
-                        return redirect('home')
+                        if user.is_superuser:
+                            # Redirige al panel de administración
+                            return redirect('/admin/panel/')
+                        else:
+                            return redirect('home')
                     else:
                         return HttpResponse("Disabled account")
                 else:
                     return HttpResponse("Invalid login")
+
 
         elif "register_submit" in request.POST:  # botón de registro
             register_form = RegisterForm(request.POST)

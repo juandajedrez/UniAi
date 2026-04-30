@@ -22,17 +22,18 @@
       <a class="nav-link text-white position-relative me-3  {% if '/notifications' in request.path %}active{% endif %}" href="{% url 'notifications_list' %}">
         <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
         {% if unread_count > 0 %}
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
             {{ unread_count }}
           </span>
         {% endif %}
       </a>
       <!-- Usuario -->
       <li class="nav-item dropdown">
-        <a class="nav-link text-white dropdown-toggle d-flex align-items-center {% if '/users/profile' in request.path %}active{% endif %}" href="{% url 'profile_detail' %}" id="userDropdown" role="button">
-          <i class="bi bi-person-circle" style="font-size: 1.5rem;"> {{ user.first_name }}</i>
+        <a class="nav-link text-white dropdown-toggle d-flex align-items-center {% if '/users/profile' in request.path %}active{% endif %}" 
+          href="{% url 'profile_detail' %}" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i> {{ user.first_name }}
         </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start" aria-labelledby="userDropdown">
           <li><a class="dropdown-item" href="{% url 'profile_detail' %}">Ver Perfil</a></li>
           <li><a class="dropdown-item" href="{% url 'edit_profile' %}">Editar Perfil</a></li>
           <li><hr class="dropdown-divider"></li>
@@ -40,13 +41,14 @@
         </ul>
       </li>
 
+
     </div>
   </div>
 </nav>
 <div id="sidebar" class="bg-dark text-white vh-100 position-fixed">
   <ul class="nav flex-column pt-3">
     <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="{% url 'user_calendar' %}" class="nav-link text-white d-flex align-items-center {% if '/calendar' in request.path and not '/calendar/event/advisings/' in request.path %}active{% endif %}">
         <i class="bi bi-calendar3" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Calendario</span>
       </a>
@@ -58,50 +60,53 @@
         <span class="ms-2">Contactos</span>
       </a>
     </li>
+<li class="nav-item">
+  <a href="{% url 'chat_list' %}" 
+     class="nav-link text-white d-flex align-items-center {% if '/chat' in request.path %}active{% endif %}">
+    
+    <!-- Ícono de chat -->
+    <i class="bi bi-chat-dots" style="font-size: 1.5rem;"></i>
+    
+    <!-- Número + texto en una sola línea -->
+    {% if unread_messages_count > 0 %}
+      <span class="badge bg-success ms-2">
+        {{ unread_messages_count }} Chat
+        <span class="visually-hidden">mensajes sin leer</span>
+      </span>
+    {% else %}
+      <span class="ms-2">Chat</span>
+    {% endif %}
+    
+  </a>
+</li>
+
+
     <li class="nav-item">
-      <a href="{% url 'chat_list' %}" class="nav-link text-white position-relative d-flex align-items-center {% if '/chat' in request.path %}active{% endif %}">
-        <i class="bi bi-chat-dots" style="font-size: 1.5rem;"></i>
-        <span class="ms-2">Chat</span>
-        {% if unread_messages_count > 0 %}
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            {{ unread_messages_count }}
-            <span class="visually-hidden">mensajes sin leer</span>
-          </span>
-        {% endif %}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="{% url 'my_courses' %}" class="nav-link text-white d-flex align-items-center {% if '/class' in request.path %}active{% endif %}">
         <i class="bi bi-book" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Cursos</span>
       </a>
     </li>
     <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
-        <i class="bi bi-building" style="font-size: 1.5rem;"></i>
-        <span class="ms-2">Salones</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="{% url 'user_advisings' %}" class="nav-link text-white d-flex align-items-center {% if '/calendar/event/advisings/' in request.path %}active{% endif %}">
         <i class="bi bi-person-workspace" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Asesorías</span>
       </a>
     </li>
     <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="#" class="nav-link text-white d-flex align-items-center {% if '/settings' in request.path %}active{% endif %}">
         <i class="bi bi-gear" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Configuración</span>
       </a>
     </li>
     <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="#" class="nav-link text-white d-flex align-items-center {% if '/feedback' in request.path %}active{% endif %}">
         <i class="bi bi-chat-left-text" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Feedback</span>
       </a>
     </li>
     <li class="nav-item">
-      <a href="#" class="nav-link text-white d-flex align-items-center">
+      <a href="#" class="nav-link text-white d-flex align-items-center {% if '/docs' in request.path %}active{% endif %}">
         <i class="bi bi-journal-text" style="font-size: 1.5rem;"></i>
         <span class="ms-2">Documentación</span>
       </a>

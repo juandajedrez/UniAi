@@ -1,0 +1,36 @@
+{% extends "home.html" %}
+
+{% block title %}Mis Asesorías{% endblock %}
+
+{% block content %}
+
+  <div class="container mt-4">
+    <!-- Sección del titulo -->
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2>Mis Asesorías</h2>
+              {% if user.profile.role == 'STUDENT' %}
+                <a href="{% url 'request_advising' %}" class="btn btn-secondary">+ Solicitar Asesoría</a>
+              {% endif %}
+              {% if user.profile.role == 'TEACHER' %}
+                <a href="{% url 'pending_advisings' %}" class="btn btn-secondary">Ver Pendientes</a>
+              {% endif %}
+            </div>
+      </div>
+    </div>
+
+    <!-- Lista de asesorías -->
+    <ul class="list-group">
+      {% for adv in advisings %}
+        <li class="list-group-item">
+          <strong>{{ adv.title }}</strong> - {{ adv.startDateTime|date:"d/m/Y H:i" }}  
+          <span class="badge bg-secondary">{{ adv.get_status_display }}</span>
+        </li>
+      {% empty %}
+        <li class="list-group-item">No tienes asesorías registradas.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+{% endblock %}

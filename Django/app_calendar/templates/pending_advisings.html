@@ -1,0 +1,41 @@
+{% extends "home.html" %}
+
+{% block title %}Asesorías Pendientes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Seccion del titulo -->
+  <div class="card shadow">
+    <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2>Asesorías Pendientes</h2>
+            <a href="{% url 'user_advisings' %}" class="btn btn-danger">Cancelar</a>
+        </div>
+    </div>
+  </div>
+
+  <!-- Lista de asesorías -->
+  <ul class="list-group">
+    {% for adv in advisings %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ adv.title }}</strong> - {{ adv.startDateTime|date:"d/m/Y H:i" }}
+          <p>{{ adv.description }}</p>
+        </div>
+        <div>
+          <form method="post" action="{% url 'accept_advising' adv.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
+          </form>
+          <form method="post" action="{% url 'reject_advising' adv.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
+          </form>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No hay asesorías pendientes.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

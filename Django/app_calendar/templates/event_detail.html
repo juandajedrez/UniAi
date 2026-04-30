@@ -1,0 +1,33 @@
+{% extends "home.html" %}
+{% block title %}Detalle del Evento{% endblock %}
+{% block content %}
+
+
+  <!-- Seccion del titulo -->
+  <div class="card shadow">
+    <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>{{ kind }}: {{ event.title }}</h2>
+            <a href="{% url 'user_advisings' %}" class="btn btn-secundary">Editar</a>
+        </div>
+    </div>
+  </div>
+<p><strong>Descripción:</strong> {{ event.description }}</p>
+<p><strong>Inicio:</strong> {{ event.startDateTime }}</p>
+<p><strong>Fin:</strong> {{ event.endDateTime }}</p>
+<p><strong>Ubicación:</strong> {{ event.location }}</p>
+<p><strong>Estado:</strong> {{ event.get_status_display }}</p>
+<p><strong>Tipo:</strong> {{ event.get_type_display }}</p>
+
+{% if extra_fields %}
+  <h3>Información adicional</h3>
+  <ul>
+    {% for label, value in extra_fields.items %}
+      <li><strong>{{ label }}:</strong> {{ value }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
+
+{% endblock %}

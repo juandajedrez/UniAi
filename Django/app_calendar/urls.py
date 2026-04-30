@@ -1,4 +1,20 @@
 from django.urls import path
 from . import views
 
-urlpatterns = []
+urlpatterns = [
+    # Calendario del usuario
+    path("", views.user_calendar, name="user_calendar"),
+    # Crear nuevo evento
+    path("event/new/", views.create_event, name="create_event"),
+    # Detalles del evento
+    path("event/<int:event_id>/", views.event_detail, name="event_detail"),
+    # Asesorías
+    path("event/advisings/", views.user_advisings, name="user_advisings"),
+    # Solicitar nueva asesoría
+    path("event/advisings/request/", views.request_advising, name="request_advising"),
+    # Pendientes de aprobación (solo para profesores)
+    path("event/advisings/pending/", views.pending_advisings, name="pending_advisings"),
+    # Aceptar o rechazar asesoría (solo para profesores)
+    path("event/advisings/<int:advising_id>/accept/", views.accept_advising, name="accept_advising"),
+    path("event/advisings/<int:advising_id>/reject/", views.reject_advising, name="reject_advising"),
+]
