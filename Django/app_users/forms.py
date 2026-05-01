@@ -1,48 +1,66 @@
 from django import forms
 from django.contrib.auth.models import User
+
+from app_class.models import Department, Program
 from .models import Profile, SocialMedia
 
 class LoginForm(forms.Form):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Nombre usuario',
+    username = forms.CharField(widget=forms.NumberInput(attrs={'placeholder':'Nombre usuario',
                                                               'class':'login_input'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder':'Password',
                                                               'class':'login_input'}))
 
 class RegisterForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'placeholder': 'Password',
-            'class': 'login_input'
+    # Campos adicionales para el perfil
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'placeholder': 'First name',
+            'class': 'form-control'
         })
     )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'placeholder': 'Confirm Password',
-            'class': 'login_input'
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Last name',
+            'class': 'form-control'
         })
+    )
+    role = forms.ChoiceField(
+        choices=[("TEACHER", "Profesor"), ("ADMIN", "Administrativo"), ("STUDENT", "Estudiante"), ("IA", "IA")],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    birthday = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'placeholder': 'YYYY-MM-DD',
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    program = forms.ModelChoiceField(
+        queryset=Program.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'first_name', 'last_name']
 
         widgets = {
-            'username': forms.TextInput(attrs={
+            'username': forms.NumberInput(attrs={
                 'placeholder': 'User name',
-                'class': 'login_input'
+                'class': 'form-control'
             }),
             'email': forms.EmailInput(attrs={
                 'placeholder': 'Email',
-                'class': 'login_input'
+                'class': 'form-control'
             }),
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-        if password and confirm_password and password != confirm_password:
-            self.add_error("confirm_password", "Las contraseñas no coinciden")
         return cleaned_data
 
 
@@ -51,14 +69,13 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ["username", "email", "first_name", "last_name"]
         widgets = {
-            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "username": forms.NumberInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].disabled = True   
 
 # --- Formulario para editar perfil ---
 class ProfileForm(forms.ModelForm):

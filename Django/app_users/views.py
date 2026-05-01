@@ -7,49 +7,138 @@ from django.contrib.auth import logout
 from .models import Profile, SocialMedia
 from django.contrib.auth.decorators import login_required
 from app_chat.models import Chat
-
+from Django.scripts import *
+from django.contrib import messages
 
 def auth_view(request):
     login_form = LoginForm()
-    register_form = RegisterForm()
-
     if request.method == "POST":
-        if "login_submit" in request.POST:  # botón de login
-            login_form = LoginForm(request.POST)
-            if login_form.is_valid():
-                cd = login_form.cleaned_data
-                user = authenticate(
-                    request,
-                    username=cd['username'],
-                    password=cd['password']
-                )
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        if user.is_superuser:
-                            # Redirige al panel de administración
-                            return redirect('/admin/panel/')
-                        else:
-                            return redirect('home')
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            cd = login_form.cleaned_data
+            user = authenticate(
+                request,
+                username=cd['username'],
+                password=cd['password']
+            )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    if user.is_superuser:
+                        # Redirige al panel de administración
+                        return redirect('/admin/panel/')
                     else:
-                        return HttpResponse("Disabled account")
+                        return redirect('home')
                 else:
-                    return HttpResponse("Invalid login")
-
-
-        elif "register_submit" in request.POST:  # botón de registro
-            register_form = RegisterForm(request.POST)
-            if register_form.is_valid():
-                user = register_form.save(commit=False)
-                user.set_password(register_form.cleaned_data["password"])
-                user.save()
-                login(request, user)  # inicia sesión automáticamente
-                return redirect("home")
+                    return HttpResponse("Disabled account")
+            else:
+                return HttpResponse("Invalid login")
 
     return render(request, "login.html", {
         "login_form": login_form,
-        "register_form": register_form
     })
+
+@login_required
+def register_view(request):
+    error_message = None  # variable para mensajes de error
+
+    if request.method == "POST":
+        if request.user.is_superuser:
+            form = RegisterForm(request.POST)
+            if form.is_valid():
+                # Construir diccionario user_params desde los campos del form
+                user_params = {
+                    "username": form.cleaned_data["username"],
+                    "first_name": form.cleaned_data["first_name"],
+                    "last_name": form.cleaned_data["last_name"],
+                    "email": form.cleaned_data["email"],
+                }
+
+                # Construir diccionario profile_params desde los campos del form
+                profile_params = {
+                    "role": form.cleaned_data["role"],
+                    "birthday": form.cleaned_data["birthday"],
+                    "department": form.cleaned_data["department"],
+                    "program": form.cleaned_data["program"],
+                }
+
+                # Crear usuario y perfil usando la función create_user
+                user = create_user(user_params, profile_params)
+
+                # Iniciar sesión automáticamente
+                login(request, user)
+                return redirect("home")
+            else:
+                error_message = "El formulario contiene errores. Revisa los campos."
+        else:
+            error_message = "Solo los superusuarios pueden registrar nuevos usuarios."
+            form = RegisterForm(request.POST)  # para mostrar datos ingresados
+    else:
+        form = RegisterForm()
+
+    return render(request, "register.html", {"form": form, "error_message": error_message})
+
+
+
+# Caso 1: Usuario no logueado, pide reset por correo
+def password_reset_request_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        try:
+            user = User.objects.get(username=username)
+            code = generate_reset_code()
+            request.session["reset_user_id"] = user.id
+            request.session["reset_code"] = code
+            send_reset_code(user.email, code)
+            messages.success(request, "Se envió un código de verificación a tu correo.")
+            return redirect("password_reset_confirm")
+        except User.DoesNotExist:
+            messages.error(request, "No existe un usuario con ese nombre de usuario.")
+    return render(request, "password_reset_request.html")
+
+def password_reset_confirm_view(request):
+    if request.method == "POST":
+        code = request.POST.get("code")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if new_password != confirm_password:
+            messages.error(request, "Las contraseñas no coinciden.")
+        elif code != request.session.get("reset_code"):
+            messages.error(request, "El código es incorrecto.")
+        else:
+            user_id = request.session.get("reset_user_id")
+            user = User.objects.get(id=user_id)
+            user.set_password(new_password)
+            user.save()
+            messages.success(request, "Tu contraseña ha sido restablecida.")
+            return redirect("auth")
+
+    return render(request, "password_reset_confirm.html")
+
+@login_required
+def password_change_view(request):
+    if request.method == "POST":
+        old_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if new_password != confirm_password:
+            messages.error(request, "Las contraseñas no coinciden.")
+        elif not request.user.check_password(old_password):
+            messages.error(request, "La contraseña actual es incorrecta.")
+        else:
+            request.user.set_password(new_password)
+            request.user.save()
+            messages.success(request, "Tu contraseña ha sido cambiada correctamente.")
+            return redirect("home")
+
+    return render(request, "password_change.html")
+
+
+@login_required
+def password_reset_done_view(request):
+    return render(request, "password_reset_done.html")
 
 
 

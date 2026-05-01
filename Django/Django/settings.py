@@ -141,3 +141,12 @@ LOGIN_URL = '/users/auth/'
 
 # Ruta al home después de iniciar sesión
 LOGIN_REDIRECT_URL = '/home/'
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "equiporoblox520@gmail.com"
+EMAIL_HOST_PASSWORD = "cypv mhvo imbu cjjy"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

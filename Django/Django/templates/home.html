@@ -111,6 +111,14 @@
         <span class="ms-2">Documentación</span>
       </a>
     </li>
+    {% if user.is_staff %}
+    <li class="nav-item">
+      <a href="/admin/panel/" class="nav-link text-white d-flex align-items-center active">
+        <i class="bi bi-speedometer2" style="font-size: 1.5rem;"></i>
+        <span class="ms-2">Panel</span>
+      </a>
+    </li>
+    {% endif %}
   </ul>
 </div>
 

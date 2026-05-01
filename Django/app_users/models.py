@@ -10,7 +10,6 @@ class Profile(models.Model):
         ("TEACHER", "Profesor"),
         ("ADMIN", "Administrativo"),
         ("STUDENT", "Estudiante"),
-        ("IA","IA"),
     ]
     photo = models.TextField(default="https://img.freepik.com/vector-premium/icono-usuario-establece-perfil-social-simbolo-vectorial-avatar-persona-cuenta-signo-web_268104-14523.jpg?semt=ais_hybrid&w=740&q=80")
     user = models.OneToOneField(

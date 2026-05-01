@@ -13,22 +13,27 @@
         </div>
 
         <div class="card-body text-center">
-            <!-- Ícono o foto grande -->
             {% if chat.users.count > 2 %}
-                <img src="{{ chat.icon }}" alt="Icono del chat"
-                     class="rounded-circle border border-success mb-3"
-                     style="width: 120px; height: 120px; object-fit: cover;">
-                <h4 class="mb-1">{{ chat.description|default:"Chat sin nombre" }}</h4>
-            {% else %}
-                {% for u in chat.users.all %}
-                    {% if u != user %}
-                        <img src="{{ u.profile.photo}}" alt="{{ u.first_name }}"
-                             class="rounded-circle border border-success mb-3"
-                             style="width: 120px; height: 120px; object-fit: cover;">
-                        <h4 class="mb-1">{{ u.first_name }} {{ u.last_name }} ({{ u.profile.program }})</h4>
+                    <img src="{{ chat.icon }}" alt="Icono del chat"
+                         class="rounded-circle me-3"
+                         style="width: 50px; height: 50px; object-fit: cover;">
+                {% else %}
+                    {% if chat.users.count == 2 %}
+                        {% for u in chat.users.all %}
+                            {% if u != user %}
+                                <img src="{{ u.profile.photo }}" alt="{{ u.first_name }}"
+                                    class="rounded-circle me-3"
+                                    style="width: 50px; height: 50px; object-fit: cover;">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {% if chat.users.count == 1 %}
+                            <img src="{{ user.profile.photo }}" alt="{{ user.first_name }}"
+                                 class="rounded-circle me-3"
+                                 style="width: 50px; height: 50px; object-fit: cover;">
+                        {% endif %}
                     {% endif %}
-                {% endfor %}
-            {% endif %}
+                {% endif %}
             <p class="text-muted">Estado: {{ chat.get_state_display }}</p>
         </div>
 

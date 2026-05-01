@@ -8,19 +8,38 @@ from .utils import build_month_view, build_week_view, build_day_view, build_year
 
 @login_required
 def user_calendar(request):
-    view = request.GET.get("view", "agenda")  # vista por defecto agenda
+    view = request.GET.get("view", "agenda")
     q = request.GET.get("q", "")
     type_filter = request.GET.get("type", "")
 
-    events = Event.objects.filter(createdBy=request.user)
+    # Obtener el calendario del usuario
+    calendar = get_object_or_404(Calendar, user=request.user.profile)
+
+    # Traer cada lista directamente
+    events = calendar.events.all().order_by("startDateTime")
+    recurrences = calendar.event_recurrence.all().order_by("startDateTime")
+    advisings = calendar.advisings.all().order_by("startDateTime")
+
+    # Aplicar filtros en cada queryset
     if q:
         events = events.filter(title__icontains=q)
+        recurrences = recurrences.filter(title__icontains=q)
+        advisings = advisings.filter(description__icontains=q)  # suponiendo que Advising usa description
+
     if type_filter:
         events = events.filter(type=type_filter)
+        recurrences = recurrences.filter(type=type_filter)
+        advisings = advisings.filter(type=type_filter)
 
-    # Preparar datos según vista
-    context = {"view": view, "events": events}
+    # Pasar cada lista al contexto
+    context = {
+        "view": view,
+        "events": events,
+        "recurrences": recurrences,
+        "advisings": advisings,
+    }
 
+    # Preparar datos según vista (ejemplo con agenda)
     if view == "month":
         month_days, current_month = build_month_view(events)
         context["month_days"] = month_days
@@ -31,14 +50,13 @@ def user_calendar(request):
         context["day_date"], context["day_events"] = build_day_view(events)
     elif view == "year":
         context["year_months"] = build_year_view(events)
-        
 
     return render(request, "user_calendar.html", context)
 
 
 @login_required
 def user_advisings(request):
-    advisings = Advising.objects.filter(createdBy=request.user).order_by("-startDateTime")
+    advisings = Advising.objects.filter(createdBy=request.user.profile).order_by("-startDateTime")
     return render(request, "user_advisings.html", {"advisings": advisings})
 
 @login_required
