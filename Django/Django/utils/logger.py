@@ -1,27 +1,35 @@
 from .branch_config import DEBUG
 
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+BLUE = "\033[94m"
+COLOR_CLOSE = "\033[0m"
+MAGENTA = "\033[35m"
+CIAN = "\033[36m"
+
 def log(message):
     if DEBUG:
-        print(f"[LOG] {message}")
+        print(f"{CIAN}[LOG] {message}{COLOR_CLOSE}")
     else:
         pass
 
 def log_error(message, e:Exception):
     if DEBUG:
-        print(f"[ERROR] {message}")
+        print(f"{RED}[ERROR] {message}{COLOR_CLOSE}")
         print(f"-> {e}")
     else:
         pass
 
 def log_warning(message):
     if DEBUG:
-        print(f"[WARNING] {message}")   
+        print(f"{YELLOW}[WARNING] {message}{COLOR_CLOSE}")   
     else:
         pass
 
 def log_info(message):
     if DEBUG:
-        print(f"[INFO] {message}")
+        print(f"{BLUE}[INFO] {message}{COLOR_CLOSE}")
     else:
         pass
 
@@ -33,7 +41,7 @@ def log_debug(message):
 
 def log_success(message):
     if DEBUG:
-        print(f"[SUCCESS] {message}")
+        print(f"{GREEN}[SUCCESS] {message}{COLOR_CLOSE}")
     else:
         pass
 
@@ -45,15 +53,14 @@ def espace():
 
 def title(message:str):
     if DEBUG:
-        print(f"---------- {message} ----------")
+        print(f"{MAGENTA}---------- {message} ----------{COLOR_CLOSE}")
     else:
         pass
 
 
 
 
-
-
 espace()
 title("Cargando modulos")
+log_success("branch_config.py cargado exitosamente")
 log_success("Logger.py cargado exitosamente")

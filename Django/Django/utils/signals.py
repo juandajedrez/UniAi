@@ -27,57 +27,64 @@ advising_accepted = Signal()       # Aceptación de asesoría
 advising_rejected = Signal()       # Rechazo de asesoría
 class_event_deleted = Signal()     # Evento de clase eliminado
 
-# ------------------ Eventos de calendario ----------------------------
+# ------------------ Eventos ----------------------------
 
 # Lógica para manejar la creación o actualización de eventos
 @receiver(post_save, sender=Event)
-def on_event_created(sender, instance, created, **kwargs):
+def on_event_created(sender, instance:Event, created:bool, course:Course = None, **kwargs):
     if created:
-        add_event_to_calendar(instance.createdBy, instance)
-        log_info(f"Evento creado: {instance.title} por {instance.createdBy.user.first_name}")
+        if course:
+            add_event_to_class(course, instance)
+            send_advertisement_course(f"Nuevo evento de clase: {instance.title}", f"Se ha creado un nuevo evento para la clase {course.name}.", course)
+            log_success(f"Evento de clase creado: {instance.title} para la clase {course.name}")
+        else:
+            add_event_to_calendar(instance.createdBy, instance)
+            log_success(f"Evento creado: {instance.title} por {instance.createdBy.user.first_name}")
     else:
-        log_info(f"Evento actualizado: {instance.title} por {instance.createdBy.user.first_name}")
+        if course:
+            send_advertisement_course(f"Evento de clase actualizado: {instance.title}", f"Se ha actualizado el evento para la clase {course.name}.", course)
+            log_success(f"Evento de clase actualizado: {instance.title} para la clase {course.name}")
+        else:
+            log_success(f"Evento actualizado: {instance.title} por {instance.createdBy.user.first_name}")
 
 # Lógica para manejar la eliminación de eventos    
 @receiver(post_delete, sender=Event)
-def on_event_deleted(sender, instance, **kwargs):
-    log_info(f"Evento eliminado: {instance.title} por {instance.createdBy.user.first_name}")
-
-# Lógica para manejar la creación de eventos específicos de clase
-@receiver(class_event_created)
-def on_class_event_created(sender, event: Event, course: Course, **kwargs):
-    add_event_to_class(course, event)
-    send_advertisement_course(f"Nuevo evento de clase: {event.title}", f"Se ha creado un nuevo evento para la clase {course.name}.", course)
-    log_info(f"Evento de clase creado: {event.title} para la clase {course.name}")
-
-# Lógica para manejar la actualización de eventos específicos de clase
-@receiver(class_event_updated)
-def on_class_event_updated(sender, event: Event, course: Course, **kwargs):
-    send_advertisement_course(f"Evento de clase actualizado: {event.title}", f"Se ha actualizado el evento para la clase {course.name}.", course)
-    log_info(f"Evento de clase actualizado: {event.title} para la clase {course.name}")
-
-# Lógica para manejar la eliminación de eventos específicos de clase
-@receiver(class_event_deleted)
-def on_class_event_deleted(sender, event: Event, course: Course, **kwargs):
-    send_advertisement_course(f"Evento de clase eliminado: {event.title}", f"Se ha eliminado el evento para la clase {course.name}.", course)
-    log_info(f"Evento de clase eliminado: {event.title} para la clase {course.name}")
+def on_event_deleted(sender, instance:Event, course:Course, **kwargs):
+    if course:
+        send_advertisement_course(f"Evento de clase eliminado: {instance.title}", f"Se ha eliminado el evento para la clase {course.name}.", course)
+        log_success(f"Evento de clase eliminado: {instance.title} para la clase {course.name}")
+    else:
+        log_success(f"Evento eliminado: {instance.title} por {instance.createdBy.user.first_name}")
 
 
 
-# # -----------------------------
-# # Asesorías
-# # -----------------------------
-# @receiver(advising_requested)
-# def on_advising_requested(sender, advising: Advising, **kwargs):
-#     pass
+# ------------------ Calendario ----------------------------
+# Lógica para manejar la creación o actualización de Calendarios
+@receiver(post_save, sender=Calendar)
+def on_Calendar_created(sender, instance:Calendar, created, **kwargs):
+    if created:
+        log_success(f"Calendaro creado para {instance.user.first_name}")
+    else:
+        log_success(f"Calendaro actualizado para {instance.user.first_name}")
 
-# @receiver(advising_accepted)
-# def on_advising_accepted(sender, advising: Advising, **kwargs):
-#     pass
+# Lógica para manejar la eliminación de Calendaros    
+@receiver(post_delete, sender=Calendar)
+def on_Calendar_deleted(sender, instance:Calendar, **kwargs):
+    log_success(f"Calendaro eliminado para {instance.user.first_name}")
 
-# @receiver(advising_rejected)
-# def on_advising_rejected(sender, advising: Advising, **kwargs):
-#     pass
+
+# ------------------ Asesorias ----------------------------
+@receiver(advising_requested)
+def on_advising_requested(sender, advising: Advising, **kwargs):
+    pass
+
+@receiver(advising_accepted)
+def on_advising_accepted(sender, advising: Advising, **kwargs):
+    pass
+
+@receiver(advising_rejected)
+def on_advising_rejected(sender, advising: Advising, **kwargs):
+    pass
 
 
 # # -----------------------------

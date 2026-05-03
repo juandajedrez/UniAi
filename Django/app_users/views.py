@@ -1,4 +1,4 @@
-from django.contrib import messages
+from Django.utils.scripts import create_user, log_debug
 log_debug("Cargando vistas de Users")
 
 from django.shortcuts import render, redirect, redirect, get_object_or_404
@@ -10,7 +10,8 @@ from django.contrib.auth import logout
 from .models import Profile, SocialMedia
 from django.contrib.auth.decorators import login_required
 from app_chat.models import Chat
-from Django.utils.scripts import create_user, log_debug
+from django.contrib import messages
+
 
 
 def auth_view(request):
