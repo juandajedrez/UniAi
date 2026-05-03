@@ -1,27 +1,53 @@
+from .branch_config import DEBUG
+
 def log(message):
-    print(f"[LOG] {message}")
+    if DEBUG:
+        print(f"[LOG] {message}")
+    else:
+        pass
 
 def log_error(message, e:Exception):
-    print(f"[ERROR] {message}")
-    print(f"-> {e}")
+    if DEBUG:
+        print(f"[ERROR] {message}")
+        print(f"-> {e}")
+    else:
+        pass
 
 def log_warning(message):
-    print(f"[WARNING] {message}")   
+    if DEBUG:
+        print(f"[WARNING] {message}")   
+    else:
+        pass
 
 def log_info(message):
-    print(f"[INFO] {message}")
+    if DEBUG:
+        print(f"[INFO] {message}")
+    else:
+        pass
 
 def log_debug(message):
-    print(f"[DEBUG] {message}")
+    if DEBUG:
+        print(f"[DEBUG] {message}")
+    else:
+        pass
 
 def log_success(message):
-    print(f"[SUCCESS] {message}")
+    if DEBUG:
+        print(f"[SUCCESS] {message}")
+    else:
+        pass
 
 def espace():
-    print("\n")
+    if DEBUG:
+        print("\n")
+    else:
+        pass
 
 def title(message:str):
-    print(f"---------- {message} ----------")
+    if DEBUG:
+        print(f"---------- {message} ----------")
+    else:
+        pass
 
 
 
