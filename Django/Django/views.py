@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from .utils.scripts import log_debug, title
+log_debug("Cargando vistas de Django")
 
 @login_required
 def home_view(request):

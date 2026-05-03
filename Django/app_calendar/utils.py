@@ -1,6 +1,8 @@
 import calendar
 from datetime import date, datetime, timedelta
 from collections import defaultdict
+from Django.utils.logger import log_debug
+log_debug("Cargando utils de app_calendar")
 
 # Vista mensual
 def build_month_view(events, year=None, month=None):

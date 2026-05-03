@@ -5,6 +5,8 @@ from django.http import HttpResponseForbidden
 from app_class.models import Course
 from app_users.models import Profile
 from .forms import AdvertisementCourseForm
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_notifications")
 
 # Lista de notificaciones del usuario
 @login_required

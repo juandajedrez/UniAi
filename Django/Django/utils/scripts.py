@@ -8,6 +8,8 @@ from app_class.models import *
 from app_ai.models import *
 from app_admin.models import *
 from app_notifications.models import *
+from .logger import log, log_error, log_debug, log_warning, log_info, log_success, title
+log_debug("Cargando scripts.py")
 
 # Diccionario de params para crear un usuario:
 profile_params = {
@@ -75,3 +77,25 @@ def send_reset_code(email, code):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[email],
     )
+
+# Agrgar evento al calendario del usuario
+def add_event_to_calendar(profile, event):
+    calendar = profile.calendar
+    calendar.events.add(event)
+
+# agregar evento a la clase 
+def add_event_to_class(class_instance, event):
+    class_instance.events.add(event)
+
+# Enviar notificación al usuario
+def send_notification(user, content):
+    Notifications.objects.create(content=content, user=user)
+
+# Enviar notificación al usuario
+def send_advertisement_course(content:str, community:Course):
+    AdvertisementCourse.objects.create(content=content, community=community)
+
+# Enviar notificación al usuario
+def send_advertisement(content:str, community:str):
+    Advertisement.objects.create(content=content, community=community)
+

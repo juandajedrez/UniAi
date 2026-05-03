@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Django.utils.logger import log_debug
+log_debug("Cargando modelos de app_calendar")
+
 # Create your models here.
 
 # ==========================
@@ -111,7 +114,7 @@ class Calendar(models.Model):
         verbose_name_plural = "Calendarios"
 
     def __str__(self):
-        return f"Calendario de {self.user.username}"
+        return f"Calendario de {self.user.user.first_name} {self.user.user.last_name}"
 
 
 

@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 from .models import Profile, SocialMedia
+from Django.utils.logger import log_debug
+log_debug("Cargando admin de app_users")
 
 # --- Inline para SocialMedia dentro de Profile ---
 class SocialMediaInline(admin.TabularInline):

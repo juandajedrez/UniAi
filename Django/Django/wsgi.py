@@ -10,7 +10,11 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from Django.utils.logger import espace, log_debug
+log_debug("Cargando wsgi")
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Django.settings')
 
 application = get_wsgi_application()
+
+espace()

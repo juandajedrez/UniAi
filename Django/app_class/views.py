@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Course
 from app_users.models import Profile
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_class")
 
 @login_required
 def my_courses(request):

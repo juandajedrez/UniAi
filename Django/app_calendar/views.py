@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from .forms import AdvisingRequestForm, EventForm
 from django.http import HttpResponseForbidden
 from .utils import build_month_view, build_week_view, build_day_view, build_year_view
+from Django.utils.scripts import log_debug
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_calendar")
 
 @login_required
 def user_calendar(request):
@@ -22,11 +25,13 @@ def user_calendar(request):
 
     # Aplicar filtros en cada queryset
     if q:
+        log_debug(f"Aplicando filtro de búsqueda:{q}")  # Debug: Verificar que se aplica el filtro
         events = events.filter(title__icontains=q)
         recurrences = recurrences.filter(title__icontains=q)
         advisings = advisings.filter(description__icontains=q)  # suponiendo que Advising usa description
 
     if type_filter:
+        log_debug(f"Aplicando filtros de vista:{type_filter}")
         events = events.filter(type=type_filter)
         recurrences = recurrences.filter(type=type_filter)
         advisings = advisings.filter(type=type_filter)
@@ -38,19 +43,24 @@ def user_calendar(request):
         "recurrences": recurrences,
         "advisings": advisings,
     }
-
     # Preparar datos según vista (ejemplo con agenda)
     if view == "month":
+        log_debug("Ver calendario en modo mes")
         month_days, current_month = build_month_view(events)
         context["month_days"] = month_days
         context["current_month"] = current_month
     elif view == "week":
+        log_debug("Ver calendario en modo semana")
         context["week_days"] = build_week_view(events)
     elif view == "day":
+        log_debug("Ver calendario en modo dia")
         context["day_date"], context["day_events"] = build_day_view(events)
     elif view == "year":
+        log_debug("Ver calendario en modo anio")
         context["year_months"] = build_year_view(events)
-
+    else:
+        log_debug("Ver calendario en modo agenda")
+    
     return render(request, "user_calendar.html", context)
 
 
@@ -68,7 +78,7 @@ def request_advising(request):
         form = AdvisingRequestForm(request.POST)
         if form.is_valid():
             advising = form.save(commit=False)
-            advising.createdBy = request.user
+            advising.createdBy = request.user.profile
             advising.title = f"Asesoría con {advising.advisor.username}"
             advising.type = "ADVISING"
             advising.status = "Pending"
@@ -112,16 +122,30 @@ def create_event(request):
         form = EventForm(request.POST)
         if form.is_valid():
             event = form.save(commit=False)
-            event.createdBy = request.user
+            event.createdBy = request.user.profile
             event.save()
+            log_debug("Evento creado con éxito.")  # Debug: Verificar creación del evento
             return redirect("user_calendar")
     else:
         form = EventForm()
     return render(request, "create_event.html", {"form": form})
 
 @login_required
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id, createdBy=request.user.profile)
+    if request.method == "POST":
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            log_debug("Event    o actualizado con éxito.")  # Debug: Verificar actualización del evento
+            return redirect("user_calendar")
+    else:
+        form = EventForm(instance=event)
+    return render(request, "edit_event.html", {"form": form})
+
+@login_required
 def event_detail(request, event_id):
-    event = get_object_or_404(Event, pk=event_id, createdBy=request.user)
+    event = get_object_or_404(Event, pk=event_id, createdBy=request.user.profile)
 
     # Detectar tipo de objeto
     if isinstance(event, Advising):

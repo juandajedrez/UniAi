@@ -3,6 +3,8 @@ from django import forms
 from app_class.models import Course
 from .models import Event, Advising, Event_recurrence
 from django.contrib.auth.models import User
+from Django.utils.logger import log_debug
+log_debug("Cargando forms de app_calendar")
 
 class AdvisingRequestForm(forms.ModelForm):
     class Meta:
@@ -58,10 +60,16 @@ class EventForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "startDateTime": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-            "endDateTime": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-            "location": forms.TextInput(attrs={"class": "form-control"}),
+            "startDateTime": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"},
+                format="%Y-%m-%dT%H:%M"
+            ),
+            "endDateTime": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"},
+                format="%Y-%m-%dT%H:%M"
+            ), "location": forms.TextInput(attrs={"class": "form-control"}),
         }
+
 
 class Event_recurrenceForm(forms.ModelForm):
     class Meta:

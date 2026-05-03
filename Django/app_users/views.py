@@ -7,14 +7,16 @@ from django.contrib.auth import logout
 from .models import Profile, SocialMedia
 from django.contrib.auth.decorators import login_required
 from app_chat.models import Chat
-from Django.scripts import *
+from Django.utils.scripts import create_user, log_debug
 from django.contrib import messages
+log_debug("Cargando vistas de Users")
 
 def auth_view(request):
     login_form = LoginForm()
     if request.method == "POST":
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
+            log_debug(f"Formulario válido: {login_form.cleaned_data}")  # Debug: Verificar datos limpios del formulario
             cd = login_form.cleaned_data
             user = authenticate(
                 request,
@@ -46,6 +48,7 @@ def register_view(request):
         if request.user.is_superuser:
             form = RegisterForm(request.POST)
             if form.is_valid():
+                log_debug(f"Formulario válido: {form.cleaned_data}")  # Debug: Verificar datos limpios del formulario
                 # Construir diccionario user_params desde los campos del form
                 user_params = {
                     "username": form.cleaned_data["username"],
@@ -64,7 +67,7 @@ def register_view(request):
 
                 # Crear usuario y perfil usando la función create_user
                 user = create_user(user_params, profile_params)
-
+                log_debug(f"Usuario creado: {user.username}")  # Debug: Verificar creación del usuario
                 # Iniciar sesión automáticamente
                 login(request, user)
                 return redirect("home")

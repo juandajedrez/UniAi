@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from Django.utils.logger import log_debug, title
+log_debug("Cargando urls de Django")
+
 urlpatterns = [
     path("admin/panel/", admin.site.urls),          # Panel de administración
     path("admin/", include("app_admin.urls")),          # Panel de administración

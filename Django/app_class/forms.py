@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Course, Classroom, Department, Program
-
+from Django.utils.logger import log_debug
+log_debug("Cargando forms de app_class")
 
 class CourseForm(forms.ModelForm):
     class Meta:

@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Chat, Message
+from Django.utils.logger import log_debug
+log_debug("Cargando admin de app_chat")
 
 # --- Admin para Chat ---
 @admin.register(Chat)
