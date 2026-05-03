@@ -1,10 +1,12 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando forms de app_calendar")
+
 from app_users.models import Profile
 from django import forms
 from app_class.models import Course
 from .models import Event, Advising, Event_recurrence
 from django.contrib.auth.models import User
-from Django.utils.logger import log_debug
-log_debug("Cargando forms de app_calendar")
+
 
 class AdvisingRequestForm(forms.ModelForm):
     class Meta:

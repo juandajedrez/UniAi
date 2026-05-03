@@ -1,7 +1,9 @@
-from django.contrib import admin
-from .models import Event, Advising, Event_recurrence, Calendar
 from Django.utils.logger import log_debug
 log_debug("Cargando admin de app_calendar")
+
+from django.contrib import admin
+from .models import Event, Advising, Event_recurrence, Calendar
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from Django.utils.logger import log_debug
 log_debug("Cargando modelos de app_calendar")
 

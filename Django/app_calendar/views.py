@@ -1,3 +1,6 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_calendar")
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -6,8 +9,7 @@ from .forms import AdvisingRequestForm, EventForm
 from django.http import HttpResponseForbidden
 from .utils import build_month_view, build_week_view, build_day_view, build_year_view
 from Django.utils.scripts import log_debug
-from Django.utils.logger import log_debug
-log_debug("Cargando views de app_calendar")
+
 
 @login_required
 def user_calendar(request):

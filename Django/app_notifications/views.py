@@ -1,3 +1,6 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_notifications")
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Notifications, AdvertisementCourse
@@ -5,8 +8,7 @@ from django.http import HttpResponseForbidden
 from app_class.models import Course
 from app_users.models import Profile
 from .forms import AdvertisementCourseForm
-from Django.utils.logger import log_debug
-log_debug("Cargando views de app_notifications")
+
 
 # Lista de notificaciones del usuario
 @login_required

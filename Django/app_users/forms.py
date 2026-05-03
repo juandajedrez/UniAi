@@ -1,10 +1,12 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando forms de app_users")
+
 from django import forms
 from django.contrib.auth.models import User
 
 from app_class.models import Department, Program
 from .models import Profile, SocialMedia
-from Django.utils.logger import log_debug
-log_debug("Cargando forms de app_users")
+
 
 class LoginForm(forms.Form):
     username = forms.CharField(widget=forms.NumberInput(attrs={'placeholder':'Nombre usuario',

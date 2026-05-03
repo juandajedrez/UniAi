@@ -1,3 +1,6 @@
+from .logger import log, log_error, log_debug, log_warning, log_info, log_success, title
+log_debug("Cargando scripts.py")
+
 #Funciones python para automatizar tareas en el proyecto Django
 from app_calendar.models import *
 from app_users.models import *
@@ -8,8 +11,7 @@ from app_class.models import *
 from app_ai.models import *
 from app_admin.models import *
 from app_notifications.models import *
-from .logger import log, log_error, log_debug, log_warning, log_info, log_success, title
-log_debug("Cargando scripts.py")
+
 
 # Diccionario de params para crear un usuario:
 profile_params = {

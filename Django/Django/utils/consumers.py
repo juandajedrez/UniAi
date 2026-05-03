@@ -1,9 +1,11 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando consumers.py")
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils.timezone import now
 from asgiref.sync import sync_to_async
 from app_users.models import Profile
-from Django.utils.logger import log_debug
-log_debug("Cargando consumers.py")
+
 
 class PresenceConsumer(AsyncWebsocketConsumer):
     async def connect(self):

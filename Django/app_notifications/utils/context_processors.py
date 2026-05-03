@@ -1,6 +1,7 @@
-from ..models import Notifications
 from Django.utils.logger import log_debug
 log_debug("Cargando context processors de app_notifications")
+
+from ..models import Notifications
 
 def unread_notifications(request):
     if request.user.is_authenticated:
