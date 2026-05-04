@@ -14,7 +14,7 @@ class Event(models.Model):
     endDateTime = models.DateTimeField("Fecha y hora de fin")
     location = models.CharField("Ubicación", max_length=100)
     isRecurrent = models.BooleanField("¿Es recurrente?", default=False)
-
+    participants = models.ManyToManyField("app_users.Profile", blank=True, related_name="participants", verbose_name="Usuarios invitados")
     createdBy = models.ForeignKey(
         "app_users.Profile",
         on_delete=models.CASCADE,

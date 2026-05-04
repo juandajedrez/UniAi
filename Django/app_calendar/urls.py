@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, apis
 from Django.utils.logger import log_debug
 
 log_debug("Cargando urls de app_calendar")
@@ -19,6 +19,6 @@ urlpatterns = [
     # Pendientes de aprobación (solo para profesores)
     path("event/advisings/pending/", views.pending_advisings, name="pending_advisings"),
     # Aceptar o rechazar asesoría (solo para profesores)
-    path("event/advisings/<int:advising_id>/accept/", views.accept_advising, name="accept_advising"),
-    path("event/advisings/<int:advising_id>/reject/", views.reject_advising, name="reject_advising"),
-]
+    path("event/advisings/<int:advising_id>/accept/", apis.accept_advising, name="accept_advising"),
+    path("event/advisings/<int:advising_id>/reject/", apis.reject_advising, name="reject_advising"),
+    ]

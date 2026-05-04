@@ -14,7 +14,8 @@ urlpatterns = [
     path("chat/", include("app_chat.urls")),      # Rutas de la app chat
     path("calendar/", include("app_calendar.urls")),  # Rutas de la app calendar
     path("notifications/", include("app_notifications.urls")),  # Rutas de la app notifications
-
+    path("notifications/unread_count/", views.unread_notifications_count, name="unread_notifications_count"),
+    path("chat/unread_count/", views.unread_messages_count, name="unread_messages_count"),
     path("home/", views.home_view, name="home"),
     path("", views.blank_view),
 ]

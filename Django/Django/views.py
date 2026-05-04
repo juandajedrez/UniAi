@@ -15,3 +15,16 @@ def custom_page_not_found(request, exception):
 def blank_view(request):
     return redirect("home")
 
+# views.py
+from django.http import JsonResponse
+from app_notifications.models import Notifications
+from app_chat.models import Message
+
+def unread_notifications_count(request):
+    count = Notifications.objects.filter(user=request.user, status="RECEIVED").count()
+    return JsonResponse({"count": count})
+
+def unread_messages_count(request):
+    count = Message.objects.filter(chat__users=request.user, read=False).exclude(sender=request.user).count()
+    return JsonResponse({"count": count})
+    

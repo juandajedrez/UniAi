@@ -50,6 +50,10 @@ class AdvisingRequestForm(forms.ModelForm):
 
 
 class EventForm(forms.ModelForm):
+    participants = forms.ModelMultipleChoiceField(
+        queryset=Profile.objects.all(),
+        widget=forms.SelectMultiple(attrs={"class": "form-select"})
+    )
     class Meta:
         model = Event
         fields = [
@@ -58,6 +62,7 @@ class EventForm(forms.ModelForm):
             "startDateTime",
             "endDateTime",
             "location",
+            "participants",
         ]
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),

@@ -65,7 +65,6 @@ def user_calendar(request):
     
     return render(request, "user_calendar.html", context)
 
-
 @login_required
 def user_advisings(request):
     advisings = Advising.objects.filter(createdBy=request.user.profile).order_by("-startDateTime")
@@ -81,7 +80,7 @@ def request_advising(request):
         if form.is_valid():
             advising = form.save(commit=False)
             advising.createdBy = request.user.profile
-            advising.title = f"Asesoría con {advising.advisor.username}"
+            advising.title = f"Asesoría con {advising.advisor.user.first_name}"
             advising.type = "ADVISING"
             advising.status = "Pending"
             advising.isRecurrent = False
@@ -97,26 +96,8 @@ def pending_advisings(request):
     if request.user.profile.role != "TEACHER":
         return HttpResponseForbidden("Solo los docentes pueden gestionar asesorías.")
 
-    advisings = Advising.objects.filter(advisor=request.user, status="Pending").order_by("startDateTime")
+    advisings = Advising.objects.filter(advisor=request.user.profile, status="Pending").order_by("startDateTime")
     return render(request, "pending_advisings.html", {"advisings": advisings})
-
-@login_required
-def accept_advising(request, advising_id):
-    if request.user.profile.role != "TEACHER":
-        return HttpResponseForbidden("Solo los docentes pueden aceptar asesorías.")
-    adv = get_object_or_404(Advising, pk=advising_id)
-    adv.status = "SCHEDULED"
-    adv.save()
-    return redirect("pending_advisings")
-
-@login_required
-def reject_advising(request, advising_id):
-    if request.user.profile.role != "TEACHER":
-        return HttpResponseForbidden("Solo los docentes pueden rechazar asesorías.")
-    adv = get_object_or_404(Advising, pk=advising_id)
-    adv.status = "CANCELLED"
-    adv.save()
-    return redirect("pending_advisings")
 
 @login_required
 def create_event(request):
@@ -126,7 +107,6 @@ def create_event(request):
             event = form.save(commit=False)
             event.createdBy = request.user.profile
             event.save()
-            log_debug("Evento creado con éxito.")  # Debug: Verificar creación del evento
             return redirect("user_calendar")
     else:
         form = EventForm()
