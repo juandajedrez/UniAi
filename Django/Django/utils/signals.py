@@ -30,12 +30,12 @@ join_event = Signal()              # Invitacion a un evento
 # ------------------ Login ----------------------------
 @receiver(user_logged_in)
 def on_user_logged_in(sender, request, user, **kwargs):
-    log_success(f"Usuario {user.username} inició sesión desde {request.META.get('REMOTE_ADDR')}")
+    log_info(f"Usuario {user.first_name} inició sesión desde {request.META.get('REMOTE_ADDR')}")
 
 # ------------------ Logout ----------------------------
 @receiver(user_logged_out)
 def on_user_logged_out(sender, request, user, **kwargs):
-    log_success(f"Usuario {user.username} cerró sesión desde {request.META.get('REMOTE_ADDR')}")
+    log_info(f"Usuario {user.first_name} cerró sesión desde {request.META.get('REMOTE_ADDR')}")
 
 # ------------------ Eventos ----------------------------
 
@@ -54,7 +54,6 @@ def on_event_participants_changed(sender, instance: Event, action, pk_set, **kwa
     elif action == "post_remove":
         # Notificar a los eliminados
         for profile_id in pk_set:
-            # Ojo: ya no está en instance.participants, hay que buscarlo directo
             from app_users.models import Profile
             p = Profile.objects.get(pk=profile_id)
             log_info(f"{p.user.first_name} ha sido eliminado del evento {instance.title}")
@@ -97,7 +96,7 @@ def before_event_updated(sender, instance: Event, **kwargs):
 @receiver(post_save, sender=Event)
 def on_event_created(sender, instance: Event, created: bool, **kwargs):
     course = kwargs.get("course", None)
-    user = kwargs.get("user", instance.createdBy.user)
+    profile = kwargs.get("user", instance.createdBy)
     if created:
         if course:
             add_event_to_class(course, instance)
@@ -108,8 +107,8 @@ def on_event_created(sender, instance: Event, created: bool, **kwargs):
             )
             log_success(f"Evento de clase creado: {instance.title} para la clase {course.name}")
         else:
-            add_event_to_calendar(user, instance)
-            log_success(f"Evento creado: {instance.title} por {user.first_name}")
+            add_event_to_calendar(profile.calendar, instance)
+            log_success(f"Evento creado: {instance.title} por {profile.user.first_name}")
     else:
         if course:
 
@@ -120,7 +119,7 @@ def on_event_created(sender, instance: Event, created: bool, **kwargs):
             )
             log_success(f"Evento de clase actualizado: {instance.title} para la clase {course.name}")
         else:
-            log_success(f"Evento actualizado: {instance.title} por {user.first_name}")
+            log_success(f"Evento actualizado: {instance.title} por {profile.user.first_name}")
 
 @receiver(post_delete, sender=Event)
 def on_event_deleted(sender, instance: Event, **kwargs):
@@ -134,7 +133,7 @@ def on_event_deleted(sender, instance: Event, **kwargs):
         )
         log_success(f"Evento de clase eliminado: {instance.title} para la clase {course.name}")
     else:
-        for p in instance.participants:
+        for p in instance.participants.all():
                 send_notification(
                     p,
                     f"El evento {instance.title} se ha eliminado"
@@ -252,7 +251,18 @@ def on_advertisement_created(sender, instance: Advertisement, created, **kwargs)
         log_success(f"Anuncio creado para comunidad {instance.community} con estado {instance.status}")
     else:
         log_success(f"Anuncio actualizado para comunidad {instance.community} con estado {instance.status}")
-
+    for profile in Profile.objects.filter(role=instance.community) if instance.community != "GLOBAL" else Profile.objects.all():
+        send_notification(
+            profile.user,
+            f"Nuevo anuncio para {instance.get_community_display()}: {instance.content[:50]}..."
+        )
+    if instance.community == "GLOBAL":
+        log_success(f"Anuncio global enviado a todos los usuarios: {instance.content[:50]}...")
+        for profile in Profile.objects.all():
+            send_notification(
+                profile.user,
+                f"Nuevo anuncio global: {instance.content[:50]}..."
+            )
 @receiver(post_delete, sender=Advertisement)
 def on_advertisement_deleted(sender, instance: Advertisement, **kwargs):
     log_success(f"Anuncio eliminado para comunidad {instance.community}")

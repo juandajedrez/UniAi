@@ -52,7 +52,8 @@ class AdvisingRequestForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     participants = forms.ModelMultipleChoiceField(
         queryset=Profile.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select"})
+        widget=forms.SelectMultiple(attrs={"class": "form-select"}),
+        required=False  
     )
     class Meta:
         model = Event

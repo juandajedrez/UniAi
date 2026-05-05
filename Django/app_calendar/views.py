@@ -127,7 +127,7 @@ def edit_event(request, event_id):
 
 @login_required
 def event_detail(request, event_id):
-    event = get_object_or_404(Event, pk=event_id, createdBy=request.user.profile)
+    event = get_object_or_404(Event, pk=event_id)
 
     # Detectar tipo de objeto
     if isinstance(event, Advising):
@@ -144,9 +144,16 @@ def event_detail(request, event_id):
         kind = "Evento"
         extra_fields = {}
 
+    is_creator = (event.createdBy == request.user.profile)
+    is_participant = (request.user.profile in event.participants.all())
+
+    if not (is_creator or is_participant):
+        log_debug(f"Usuario {request.user.username} no tiene permiso para ver el evento {event_id}")  # Debug: Verificar permisos
+        return HttpResponseForbidden("No tienes permiso para ver este evento.")
+
     return render(
         request,
         "event_detail.html",
-        {"event": event, "kind": kind, "extra_fields": extra_fields}
+        {"event": event, "kind": kind, "extra_fields": extra_fields, "is_creator": is_creator, "is_participant": is_participant}
     )
 

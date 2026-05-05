@@ -8,7 +8,17 @@
     <div class="card-header bg-success text-white">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>{{ kind }}: {{ event.title }}</h2>
-            <a href="{% url 'edit_event' event.pk %}" class="btn btn-secundary">Editar</a>
+            <div>
+
+              {% if is_participant %}
+
+                <a href="{% url 'reject_event' event.pk %}" class="btn btn-danger">Rechazar</a>
+              {% endif %}
+              {% if is_creator %}
+                <a href="{% url 'edit_event' event.pk %}" class="btn btn-primary">Editar</a>
+                <a href="{% url 'remove_event' event.pk %}" class="btn btn-danger">Eliminar</a>
+              {% endif %}
+            </div>
         </div>
     </div>
   </div>

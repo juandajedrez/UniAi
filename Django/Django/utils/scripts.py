@@ -72,9 +72,11 @@ def send_advertisement_course(content:str, community:Course):
 def send_advertisement(content:str, community:str):
     Advertisement.objects.create(content=content, community=community)
 
+# Agregar participantes al evento
 def add_participants_to_event(event:Event, profile:Profile):
     event.participants.add(profile)
 
-
-
+# Eliminar participantes del avento
+def remove_participants_from_event(event:Event, profile:Profile):
+    event.participants.remove(profile)
 

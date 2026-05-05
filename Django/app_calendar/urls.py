@@ -21,4 +21,9 @@ urlpatterns = [
     # Aceptar o rechazar asesoría (solo para profesores)
     path("event/advisings/<int:advising_id>/accept/", apis.accept_advising, name="accept_advising"),
     path("event/advisings/<int:advising_id>/reject/", apis.reject_advising, name="reject_advising"),
+    # Rechazar invitacion a evento
+    path("event/<int:event_id>/reject/", apis.reject_event, name="reject_event"),
+    # Cancelar un evento
+    path("event/<int:event_id>/remove/", apis.remove_event, name="remove_event"),
+
     ]

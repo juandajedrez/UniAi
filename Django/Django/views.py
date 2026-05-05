@@ -20,9 +20,19 @@ from django.http import JsonResponse
 from app_notifications.models import Notifications
 from app_chat.models import Message
 
+
 def unread_notifications_count(request):
+    # Buscar las notificaciones enviadas pero no recibidas
+    sent_notifications = Notifications.objects.filter(user=request.user, status="SENT")
+
+    # Actualizarlas a "RECEIVED"
+    sent_notifications.update(status="RECEIVED")
+
+    # Contar las que están en estado RECEIVED
     count = Notifications.objects.filter(user=request.user, status="RECEIVED").count()
+
     return JsonResponse({"count": count})
+
 
 def unread_messages_count(request):
     count = Message.objects.filter(chat__users=request.user, read=False).exclude(sender=request.user).count()

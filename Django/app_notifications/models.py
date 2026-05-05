@@ -17,7 +17,7 @@ class Notifications(models.Model):
         ("SENT", "Enviado"),
         ("RECEIVED", "Recibido"),
         ("READ", "Leído"),
-    ], default="RECEIVED")
+    ], default="SENT")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):

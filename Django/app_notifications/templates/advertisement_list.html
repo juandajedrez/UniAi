@@ -1,0 +1,30 @@
+{% extends "home.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+    <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Anuncios</h2>
+            <div>
+              {% if is_superuser %}
+                    <a href="{% url 'create_advertisement' %}" class="btn btn-primary mb-3">Crear anuncio</a>
+              {% endif %}
+            </div>
+        </div>
+    </div>
+  </div>
+    <ul class="list-group">
+        {% for ad in advertisements %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    {{ ad.content }} <br>
+                    <small>{{ ad.timestamp }}</small> - <strong>{{ ad.get_status_display }}</strong>
+                </span>
+                <span class="badge bg-info">{{ ad.get_community_display }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No hay anuncios disponibles.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

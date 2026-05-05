@@ -3,11 +3,11 @@ log_debug("Cargando views de app_notifications")
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Notifications, AdvertisementCourse
+from .models import *
 from django.http import HttpResponseForbidden
 from app_class.models import Course
 from app_users.models import Profile
-from .forms import AdvertisementCourseForm
+from .forms import *
 
 
 # Lista de notificaciones del usuario
@@ -64,3 +64,26 @@ def create_course_ad(request, course_id):
         form = AdvertisementCourseForm()
 
     return render(request, "create_course_ad.html", {"course": course, "form": form})
+
+@login_required
+def advertisement_list(request):
+    advertisements = None
+    if request.user.is_staff or request.user.is_superuser:
+        advertisements = Advertisement.objects.filter(status="ACTIVE")
+        return render(request, "advertisement_list.html", {"advertisements": advertisements, "is_superuser":True})
+    else:
+        advertisements = Advertisement.objects.filter(status="ACTIVE", community=request.user.profile.role)
+        global_ads = Advertisement.objects.filter(status="ACTIVE", community="GLOBAL")
+        advertisements_final = advertisements.union(global_ads)
+    return render(request, "advertisement_list.html", {"advertisements": advertisements_final, "is_superuser": False})
+
+@login_required
+def create_advertisement(request):
+    if request.method == "POST":
+        form = AdvertisementForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("advertisement_list")
+    else:
+        form = AdvertisementForm()
+    return render(request, "advertisement_form.html", {"form": form})
