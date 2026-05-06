@@ -14,6 +14,7 @@ from app_notifications.models import *
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+from .signals import user_registered
 
 # Diccionario de params para crear un usuario:
 profile_params = {
@@ -36,7 +37,8 @@ def create_user(user_params:dict, profile_params:dict):
     # Creamos el usuario y las instancias relacionadas
     user = User.objects.create(**user_params, password=password)
     semester = 1 if profile_params["role"] == "STUDENT" else None
-    Profile.objects.create(user=user, **profile_params, semester=semester)
+    profile = Profile.objects.create(user=user, **profile_params, semester=semester)
+    user_registered.send(sender=Profile, profile=profile)  # Enviar señal de usuario registrado   
     return user
 
 # Generar un código aleatorio de 6 dígitos

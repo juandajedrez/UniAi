@@ -46,7 +46,7 @@ def on_event_participants_changed(sender, instance: Event, action, pk_set, **kwa
         for profile_id in pk_set:
             p = instance.participants.get(pk=profile_id)
             log_info(f"{p.user.first_name} ha sido agregado al evento {instance.title}")
-            send_notification(
+            Notifications.objects.create(
                 p.user,
                 f"Has sido agregado al evento '{instance.title}'."
             )

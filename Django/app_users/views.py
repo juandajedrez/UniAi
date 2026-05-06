@@ -1,4 +1,4 @@
-from Django.utils.scripts import create_user, log_debug
+from Django.utils.scripts import create_user, generate_reset_code, log_debug, send_reset_code
 log_debug("Cargando vistas de Users")
 
 from django.shortcuts import render, redirect, redirect, get_object_or_404
