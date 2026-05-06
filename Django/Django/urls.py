@@ -18,6 +18,7 @@ urlpatterns = [
     path("chat/unread_count/", views.unread_messages_count, name="unread_messages_count"),
     path("home/", views.home_view, name="home"),
     path("", views.blank_view),
+    path("ia/", include("app_ai.urls")),          # Rutas de la app ai
 ]
 #handler404 = "Django.views.custom_page_not_found"
 

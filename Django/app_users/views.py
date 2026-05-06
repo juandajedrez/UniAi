@@ -1,4 +1,4 @@
-from Django.utils.scripts import create_user, log_debug
+from Django.utils.scripts import create_user, generate_reset_code, log_debug, send_reset_code
 log_debug("Cargando vistas de Users")
 
 from django.shortcuts import render, redirect, redirect, get_object_or_404
@@ -11,7 +11,7 @@ from .models import Profile, SocialMedia
 from django.contrib.auth.decorators import login_required
 from app_chat.models import Chat
 from django.contrib import messages
-
+from Django.utils.signals import user_registered    
 
 
 def auth_view(request):
@@ -72,6 +72,7 @@ def register_view(request):
                 user = create_user(user_params, profile_params)
                 log_debug(f"Usuario creado: {user.username}")  # Debug: Verificar creación del usuario
                 # Iniciar sesión automáticamente
+                user_registered.send(sender=Profile, profile=user.profile)  # Enviar señal de usuario registrado
                 login(request, user)
                 return redirect("home")
             else:
@@ -95,7 +96,9 @@ def password_reset_request_view(request):
             code = generate_reset_code()
             request.session["reset_user_id"] = user.id
             request.session["reset_code"] = code
+            log_debug(f"Generando código de recuperación para {user.username}")  # Debug: Verificar que se está generando el código
             send_reset_code(user.email, code)
+            log_debug(f"Código de recuperación generado para {user.username}: {code}")  # Debug: Verificar generación del código
             messages.success(request, "Se envió un código de verificación a tu correo.")
             return redirect("password_reset_confirm")
         except User.DoesNotExist:

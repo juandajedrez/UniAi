@@ -34,7 +34,9 @@ def create_user(user_params:dict, profile_params:dict):
     password = user_params["username"] # Contraseña por defecto (puede ser cambiada por el usuario)
 
     # Creamos el usuario y las instancias relacionadas
-    user = User.objects.create(**user_params, password=password)
+    user = User.objects.create(**user_params)
+    user.set_password(password)
+    user.save()
     semester = 1 if profile_params["role"] == "STUDENT" else None
     Profile.objects.create(user=user, **profile_params, semester=semester)
     return user

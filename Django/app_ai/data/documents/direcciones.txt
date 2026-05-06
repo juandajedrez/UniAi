@@ -1,0 +1,52 @@
+Entidad: Entrada principal Universidad del Quindío
+Coordenadas: 4.55395252725635, -75.66020315188669
+Descripción: Punto principal de acceso al campus universitario. Desde aquí se puede ingresar a las diferentes facultades y edificios administrativos.
+Referencia espacial: Cerca del edificio administrativo y vías principales del campus.
+
+---
+
+Entidad: Facultad de Ciencias de la Salud
+Coordenadas: 4.556355309239439, -75.65889335985999
+Descripción: Edificio donde se desarrollan programas académicos relacionados con medicina, enfermería y áreas de la salud.
+Referencia espacial: Ubicada en la zona norte del campus, cercana a la Biblioteca Central.
+Cómo llegar: Desde la entrada principal, avanzar hacia el norte siguiendo las vías internas hasta encontrar el edificio de salud. :contentReference[oaicite:1]{index=1}
+
+---
+
+Entidad: Facultad de Ciencias Agroindustriales
+Coordenadas: 4.554573164589939, -75.66210285679566
+Descripción: Facultad enfocada en programas agroindustriales, producción y desarrollo rural.
+Referencia espacial: Ubicada hacia el sector occidental del campus.
+Cómo llegar: Desde la entrada principal, dirigirse hacia el occidente siguiendo los caminos internos del campus.
+
+---
+
+Entidad: Biblioteca Central (CRAI)
+Coordenadas: 4.556594508396184, -75.65907732533077
+Descripción: Centro de recursos para el aprendizaje e investigación, con salas de estudio, libros y acceso a bases de datos académicas.
+Referencia espacial: Ubicada cerca de la Facultad de Ciencias de la Salud.
+Cómo llegar: Desde la entrada principal, caminar hacia el norte; la biblioteca es uno de los edificios centrales del campus. :contentReference[oaicite:2]{index=2}
+
+---
+
+Entidad: Facultad de Ingeniería
+Coordenadas: 4.5559207277588065, -75.65983370819697
+Descripción: Edificio donde se encuentran programas de ingeniería como sistemas, civil y electrónica.
+Referencia espacial: Ubicada en el centro del campus, cercana a la biblioteca y otras facultades.
+Cómo llegar: Desde la entrada principal, avanzar recto hacia el centro del campus.
+
+---
+
+Entidad: Edificio Administrativo
+Coordenadas: 4.552868086801359, -75.65938488992852
+Descripción: Lugar donde se encuentran oficinas administrativas, rectoría y servicios institucionales.
+Referencia espacial: Muy cercano a la entrada principal del campus.
+Cómo llegar: Al ingresar por la entrada principal, es uno de los primeros edificios visibles.
+
+---
+
+Entidad: Vicerrectoría Académica
+Coordenadas: 4.552856054947472, -75.65916025494606
+Descripción: Dependencia encargada de la gestión académica, programas y planificación educativa.
+Referencia espacial: Ubicada dentro del edificio administrativo o muy cerca de este.
+Cómo llegar: Desde la entrada principal, dirigirse al edificio administrativo. :contentReference[oaicite:3]{index=3}

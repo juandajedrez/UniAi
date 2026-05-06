@@ -324,7 +324,7 @@ def on_user_registered(sender, profile:Profile, **kwargs):
         user=profile.user)
 
     #Crear chat con sigo mismo para guardar mensajes importantes
-    chat = Chat.objects.create(description=f"Chat de {profile.user.first_name}", status="RECEIVED")
+    chat = Chat.objects.create(description=f"Chat de {profile.user.first_name}", state="ACTIVE")
     chat.users.add(profile.user)
     log_success(f"Nuevo usuario registrado: {profile.user.username} ({profile.user.email})")
 
