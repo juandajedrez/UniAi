@@ -82,7 +82,7 @@ body {
 
 /* Forzar contraste en el container */
 .container {
-    color: #f0fff0 !important;
+    color: #f0fff0 !important; /* verde muy claro para todo el texto dentro del contenedor */
 }
 
 .container h1 {

@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
+{% extends 'home.html' %}
+
+{% block title %}Helper — Asistente Académico UniQuindío{% endblock %}
+
+{% block extra_head %}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>Helper — Asistente Académico UniQuindío</title>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -83,14 +84,9 @@
     #map-iframe-wrapper iframe { display: block; width: 100%; height: 380px; border: none; }
     .map-label { background: #065f46; color: white; padding: 7px 14px; font-size: 12px; font-weight: 500; }
   </style>
-</head>
-<body>
+{% endblock %}
 
-<!-- ── Datos de Django serializados de forma segura fuera de script ── -->
-    {{ historial_json|json_script:"historial-data" }}
-    {{ ubicaciones|json_script:"ubicaciones-data" }}
-
-
+{% block content %}
 
 <!-- Config de la app como data-attributes (sin Django dentro de script) -->
 <div id="app-config"
@@ -108,7 +104,6 @@
   </div>
   <div class="user-info">
     <span>{{ request.user.get_full_name|default:request.user.username }}</span>
-    <a href="{% url 'logout' %}" class="btn-logout">Salir</a>
   </div>
 </header>
 
@@ -116,7 +111,7 @@
 <div class="main">
   <div id="chat-messages">
     <div class="msg assistant">
-      <div class="bubble">¡Hola{% if estudiante %}, {{ estudiante.user.first_name }}{% endif %}! Soy <strong>Helper</strong> 👋
+      <div class="bubble">¡Hola{{ request.user.first_name }}! Soy <strong>Helper</strong> 👋
 
 Puedo ayudarte con:
 📋 Matrícula y reinscripción
@@ -128,9 +123,9 @@ Puedo ayudarte con:
 ¿En qué puedo ayudarte hoy?</div>
     </div>
 
-    {% for msg in historial %}
+    {% for msg in messages %}
     <div class="msg {{ msg.rol }}">
-      <div class="bubble">{{ msg.contenido }}</div>
+      <div class="bubble">{{ msg.content }}</div>
     </div>
     {% endfor %}
   </div>
@@ -164,6 +159,9 @@ Puedo ayudarte con:
   </div>
 </div>
 
+ {% endblock %}
+
+ {% block scripts %}
 <!-- ── JavaScript limpio — cero Django aquí adentro ── -->
 <script>
 (function () {
@@ -324,5 +322,4 @@ Puedo ayudarte con:
 })();
 </script>
 
-</body>
-</html>
+ {% endblock %}

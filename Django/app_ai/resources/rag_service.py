@@ -1,7 +1,6 @@
 """
-rag_service.py — RAG desde PostgreSQL
-Reemplaza rag_pipeline.py: en lugar de leer .txt y buscar en FAISS,
-consulta directamente los modelos Django con el ORM.
+rag_service.py — RAG desde PostgreSQL con tus modelos Django
+Consulta directamente Profile, Course, Event, Advising, Chat, Message, Notifications y DocumentoRAG.
 """
 
 import logging
@@ -9,271 +8,151 @@ from django.conf import settings
 
 logger = logging.getLogger("agente")
 
-# ── Palabras clave por tipo de consulta ───────────────────────
-
-KEYWORDS_HORARIO = [
-    "horario", "salon", "salón", "aula", "clase", "clases",
-    "donde tengo", "dónde tengo", "cuándo tengo", "cuando tengo",
-    "qué días", "que dias", "dicta", "se dicta",
-]
-
-KEYWORDS_NOTAS = [
-    "nota", "notas", "calificacion", "calificación", "definitiva",
-    "promedio", "perdí", "perdi", "aprobé", "aprobe",
-    "reprobé", "reprobe", "corte", "cuanto saque", "cuánto saqué",
-]
-
-KEYWORDS_DOCENTES = [
-    "docente", "profesor", "profesora", "quien dicta", "quién dicta",
-    "quien da", "quién da", "quien enseña", "quién enseña",
-    "nombre del profe", "profe de", "maestro",
-]
-
-KEYWORDS_UBICACION = [
-    "donde", "dónde", "ubicación", "ubicacion", "dirección", "direccion",
-    "como llego", "cómo llego", "queda", "mapa", "lugar", "sitio",
-]
-
-
-def build_context(estudiante, query: str) -> str:
+def build_context(profile, query: str) -> str:
     """
-    Construye el contexto completo del estudiante desde PostgreSQL.
-    Siempre incluye: perfil, horario, notas y docentes.
-    No depende de palabras clave — el modelo decide qué usar.
+    Construye el contexto completo del usuario desde la base de datos.
+    Incluye: perfil, cursos, eventos, asesorías, chats, mensajes y notificaciones.
     """
-    if not estudiante:
-        logger.warning("RAG — Sin estudiante vinculado. Solo información pública.")
+    if not profile:
+        logger.warning("RAG — Sin perfil vinculado. Solo información pública.")
         return _get_public_context(query) or "Contexto institucional no disponible."
 
-    logger.info(f"RAG — Cargando datos completos de: {estudiante}")
+    logger.info(f"RAG — Cargando datos completos de: {profile}")
 
     secciones: list[str] = []
 
-    # ── 1. Perfil del estudiante ──────────────────────────────
-    perfil = _get_perfil_context(estudiante)
+    # ── 1. Perfil ──────────────────────────────
+    perfil = _get_perfil_context(profile)
     if perfil:
         secciones.append(perfil)
 
-    # ── 2. Horario completo ───────────────────────────────────
-    horario = _get_horario_context(estudiante, query.lower())
-    if horario:
-        secciones.append(horario)
+    # ── 2. Cursos ──────────────────────────────
+    cursos = _get_courses_context(profile)
+    if cursos:
+        secciones.append(cursos)
 
-    # ── 3. Notas completas ────────────────────────────────────
-    notas = _get_notas_context(estudiante)
-    if notas:
-        secciones.append(notas)
+    # ── 3. Eventos ─────────────────────────────
+    eventos = _get_events_context(profile)
+    if eventos:
+        secciones.append(eventos)
 
-    # ── 4. Docentes de sus materias ───────────────────────────
-    docentes = _get_docentes_context(estudiante)
-    if docentes:
-        secciones.append(docentes)
+    # ── 4. Asesorías ───────────────────────────
+    advisings = _get_advisings_context(profile)
+    if advisings:
+        secciones.append(advisings)
 
-    # ── 5. Información pública (solo si la pregunta lo requiere)
-    query_lower = query.lower()
-    temas_publicos = [
-        "matrícula", "matricula", "certificado", "reglamento",
-        "faq", "pregunta", "trámite", "tramite", "beca", "bienestar",
-    ]
-    if any(t in query_lower for t in temas_publicos):
-        pub = _get_public_context(query)
-        if pub:
-            secciones.append(pub)
+    # ── 5. Chats y mensajes ────────────────────
+    chats = _get_chats_context(profile.user)
+    if chats:
+        secciones.append(chats)
+
+    # ── 6. Notificaciones ──────────────────────
+    notifs = _get_notifications_context(profile.user)
+    if notifs:
+        secciones.append(notifs)
+
+    # ── 7. Información pública ─────────────────
+    pub = _get_public_context(query)
+    if pub:
+        secciones.append(pub)
 
     if not secciones:
-        return "No se encontró información en la base de datos para este estudiante."
+        return "No se encontró información en la base de datos para este perfil."
 
     logger.info(f"RAG — {len(secciones)} secciones de contexto cargadas.")
     return "\n\n---\n\n".join(secciones)
 
 
-def _get_perfil_context(estudiante) -> str:
-    """Retorna el perfil completo del estudiante."""
-    user = estudiante.user
-    lineas = ["Perfil del estudiante:"]
+def _get_perfil_context(profile) -> str:
+    """Perfil del usuario."""
+    user = profile.user
+    lineas = ["Perfil del usuario:"]
     lineas.append(f"Nombre: {user.get_full_name() or user.username}")
-    if estudiante.documento:
-        lineas.append(f"Documento: {estudiante.documento}")
-    if estudiante.programa:
-        lineas.append(f"Programa: {estudiante.programa}")
-    if estudiante.semestre:
-        lineas.append(f"Semestre: {estudiante.semestre}")
-    if estudiante.sede:
-        lineas.append(f"Sede: {estudiante.sede}")
-    if estudiante.correo_inst:
-        lineas.append(f"Correo institucional: {estudiante.correo_inst}")
-    logger.info(f"RAG perfil — cargado para {user.get_full_name()}")
+    lineas.append(f"Programa: {profile.program.name}")
+    lineas.append(f"Facultad: {profile.department.name}")
+    lineas.append(f"Rol: {profile.get_role_display()}")
+    if profile.semester:
+        lineas.append(f"Semestre: {profile.semester}")
     return "\n".join(lineas)
 
 
-# ─────────────────────────────────────────────────────────────
-#  CONSULTAS POR TIPO
-# ─────────────────────────────────────────────────────────────
-
-def _get_horario_context(estudiante, query_lower: str) -> str:
-    """Retorna el horario del estudiante desde la DB."""
-    from ..models import Horario
-
-    horarios = Horario.objects.filter(estudiante=estudiante)
-    logger.info(f"RAG horario — encontrados: {horarios.count()} registros para {estudiante}")
-
-    dias_map = {
-        "lunes": "Lunes", "martes": "Martes", "miércoles": "Miércoles",
-        "miercoles": "Miércoles", "jueves": "Jueves",
-        "viernes": "Viernes", "sábado": "Sábado", "sabado": "Sábado",
-    }
-    for kw, dia in dias_map.items():
-        if kw in query_lower:
-            horarios = horarios.filter(dia=dia)
-            break
-
-    if not horarios.exists():
-        return "No se encontraron clases registradas en el horario."
-
-    lineas = ["Horario académico:"]
-    for h in horarios:
-        lineas.append(h.as_context_text())
-
+def _get_courses_context(profile) -> str:
+    """Cursos del usuario."""
+    from app_class.models import Course
+    cursos = profile.courses_as_student.all() | profile.courses_as_teacher.all()
+    if not cursos.exists():
+        return "No se encontraron cursos asociados."
+    lineas = ["Cursos:"]
+    for c in cursos:
+        lineas.append(f"{c.name} — {c.description[:80]}...")
     return "\n".join(lineas)
 
 
-def _get_notas_context(estudiante) -> str:
-    """Retorna todas las notas del estudiante desde la DB."""
-    from ..models import Nota
-
-    notas = Nota.objects.filter(estudiante=estudiante)
-    logger.info(f"RAG notas — encontradas: {notas.count()} materias para {estudiante}")
-
-    if not notas.exists():
-        return "No se encontraron notas registradas."
-
-    lineas = ["Notas del período actual:"]
-    for n in notas:
-        lineas.append(n.as_context_text())
-
+def _get_events_context(profile) -> str:
+    """Eventos del usuario."""
+    from app_calendar.models import Event
+    events = Event.objects.filter(participants=profile)
+    if not events.exists():
+        return "No se encontraron eventos."
+    lineas = ["Eventos:"]
+    for e in events:
+        lineas.append(f"{e.title} — {e.startDateTime.strftime('%d/%m %H:%M')} en {e.location}")
     return "\n".join(lineas)
 
 
-def _get_docentes_context(estudiante) -> str:
-    """Retorna los docentes de las materias del estudiante."""
-    from ..models import Docente, Horario
+def _get_advisings_context(profile) -> str:
+    """Asesorías del usuario."""
+    from app_calendar.models import Advising
+    advisings = Advising.objects.filter(createdBy=profile)
+    if not advisings.exists():
+        return "No se encontraron asesorías."
+    lineas = ["Asesorías:"]
+    for a in advisings:
+        lineas.append(f"{a.title} con {a.advisor.user.get_full_name()} — {a.startDateTime.strftime('%d/%m %H:%M')}")
+    return "\n".join(lineas)
 
-    # Obtener los códigos de las materias del estudiante
-    codigos = Horario.objects.filter(
-        estudiante=estudiante
-    ).values_list("codigo", flat=True).distinct()
 
-    docentes = Docente.objects.filter(codigo__in=codigos)
+def _get_chats_context(user) -> str:
+    """Chats y mensajes del usuario."""
+    from app_chat.models import Chat, Message
+    chats = Chat.objects.filter(users=user)
+    if not chats.exists():
+        return "No se encontraron chats."
+    lineas = ["Chats:"]
+    for c in chats:
+        lineas.append(f"{c.name} — {c.description or 'Sin descripción'}")
+        msgs = Message.objects.filter(chat=c).order_by("-timeStamp")[:3]
+        for m in msgs:
+            lineas.append(f"  {m.sender.username}: {m.content[:60]}...")
+    return "\n".join(lineas)
 
-    if not docentes.exists():
-        return "No se encontró información de docentes."
 
-    lineas = ["Docentes de tus materias:"]
-    for d in docentes:
-        lineas.append(d.as_context_text())
-
-    logger.info(f"RAG docentes: {docentes.count()} registros")
+def _get_notifications_context(user) -> str:
+    """Notificaciones del usuario."""
+    from app_notifications.models import Notifications
+    notifs = Notifications.objects.filter(user=user).order_by("-timestamp")[:5]
+    if not notifs.exists():
+        return "No se encontraron notificaciones."
+    lineas = ["Notificaciones recientes:"]
+    for n in notifs:
+        lineas.append(f"{n.timestamp.strftime('%d/%m %H:%M')} — {n.content}")
     return "\n".join(lineas)
 
 
 def _get_public_context(query: str) -> str:
-    """
-    Búsqueda semántica en DocumentoRAG (información pública).
-    Usa similitud de embeddings si están disponibles,
-    o búsqueda por palabras clave como fallback.
-    """
-    from ..models import DocumentoRAG
-
-    # ── Intento 1: búsqueda vectorial con embeddings ──────────
-    try:
-        resultado = _semantic_search(query)
-        if resultado:
-            return resultado
-    except Exception as e:
-        logger.warning(f"Búsqueda vectorial falló: {e}. Usando búsqueda por keywords.")
-
-    # ── Intento 2: búsqueda por palabras clave (fallback) ─────
+    """Información institucional pública."""
+    from app_ai.models import DocumentoRAG
+    from django.db.models import Q
     palabras = [p for p in query.lower().split() if len(p) > 3]
     if not palabras:
         return ""
-
-    from django.db.models import Q
     filtro = Q()
-    for p in palabras[:4]:     # máximo 4 palabras para no saturar
+    for p in palabras[:4]:
         filtro |= Q(texto__icontains=p)
-
     docs = DocumentoRAG.objects.filter(filtro)[:5]
-
     if not docs.exists():
         return ""
-
     lineas = ["Información institucional relevante:"]
     for d in docs:
-        lineas.append(d.texto[:400])     # máximo 400 chars por fragmento
-
-    logger.info(f"RAG público (keywords): {docs.count()} fragmentos")
+        lineas.append(d.texto[:400])
     return "\n\n".join(lineas)
-
-
-def _semantic_search(query: str, top_k: int = 4) -> str:
-    """
-    Búsqueda semántica en DocumentoRAG usando embeddings guardados en DB.
-    Requiere que los documentos tengan embedding_json poblado.
-    """
-    import json
-    import numpy as np
-    from ..models import DocumentoRAG
-    from sentence_transformers import SentenceTransformer
-
-    # Cargar modelo (se cachea en memoria tras la primera carga)
-    modelo = _get_embedding_model()
-    if modelo is None:
-        return ""
-
-    query_embedding = modelo.encode([query], normalize_embeddings=True)[0]
-
-    # Cargar todos los embeddings de la DB
-    docs = DocumentoRAG.objects.exclude(embedding_json=None).only(
-        "id", "texto", "embedding_json"
-    )
-    if not docs.exists():
-        return ""
-
-    scores = []
-    for doc in docs:
-        vec = np.array(doc.embedding_json, dtype="float32")
-        score = float(np.dot(query_embedding, vec))
-        scores.append((score, doc))
-
-    # Ordenar por similitud descendente
-    scores.sort(key=lambda x: x[0], reverse=True)
-    top = [(s, d) for s, d in scores[:top_k] if s >= 0.15]
-
-    if not top:
-        return ""
-
-    lineas = ["Información institucional:"]
-    for _, doc in top:
-        lineas.append(doc.texto[:400])
-
-    logger.info(f"RAG semántico: {len(top)} fragmentos (score >= 0.15)")
-    return "\n\n".join(lineas)
-
-
-# Cache simple del modelo de embeddings en memoria
-_embedding_model = None
-
-def _get_embedding_model():
-    """Carga el modelo de embeddings una sola vez y lo cachea."""
-    global _embedding_model
-    if _embedding_model is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            _embedding_model = SentenceTransformer(
-                "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-            )
-            logger.info("Modelo de embeddings cargado correctamente.")
-        except Exception as e:
-            logger.error(f"No se pudo cargar el modelo de embeddings: {e}")
-            return None
-    return _embedding_model
