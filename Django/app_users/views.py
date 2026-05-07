@@ -1,4 +1,4 @@
-from Django.utils.scripts import create_user, generate_reset_code, log_debug, send_reset_code
+from Django.utils.logger import log_dic, log_error, log_info, log_success, log_debug
 log_debug("Cargando vistas de Users")
 
 from django.shortcuts import render, redirect, redirect, get_object_or_404
@@ -11,8 +11,8 @@ from .models import Profile, SocialMedia
 from django.contrib.auth.decorators import login_required
 from app_chat.models import Chat
 from django.contrib import messages
-
-
+from .signals import user_registered, user_registered_error
+from Django.utils.scripts import generate_reset_code, send_reset_code
 
 def auth_view(request):
     login_form = LoginForm()
@@ -51,7 +51,7 @@ def register_view(request):
         if request.user.is_superuser:
             form = RegisterForm(request.POST)
             if form.is_valid():
-                log_debug(f"Formulario válido: {form.cleaned_data}")  # Debug: Verificar datos limpios del formulario
+                log_dic("Formulario válido: ", form.cleaned_data)  # Debug: Verificar datos limpios del formulario
                 # Construir diccionario user_params desde los campos del form
                 user_params = {
                     "username": form.cleaned_data["username"],
@@ -67,12 +67,26 @@ def register_view(request):
                     "department": form.cleaned_data["department"],
                     "program": form.cleaned_data["program"],
                 }
+                #Creamos los parametros por defecto para el usuario
+                password = user_params["username"] # Contraseña por defecto (puede ser cambiada por el usuario)
+                user= None
+                profile = None
+                # Creamos el usuario y las instancias relacionadas
+                try:
+                    log_info(f"Creando usuario con username: {user_params['username']} y email: {user_params['email']}") 
+                    log_dic("Parámetros del usuario: ", user_params)
+                    log_dic("Parámetros del perfil: ", profile_params)
+                    user = User.objects.create(**user_params, password=password)
+                    semester = 1 if profile_params["role"] == "STUDENT" else None
+                    profile = Profile.objects.create(user=user, **profile_params, semester=semester)
+                    user_registered.send(sender=Profile, profile=profile)  # Enviar señal de usuario registrado  
+                except Exception as e:
+                    log_error(f"Error al crear usuario", {e})
+                    messages.error(request, "Error al crear el usuario.")
+                    user_registered_error.send(sender=Profile, profile=profile)  
+                    return render(request, "register.html", {"form": form, "error_message": error_message})
 
-                # Crear usuario y perfil usando la función create_user
-                user = create_user(user_params, profile_params)
-                log_debug(f"Usuario creado: {user.username}")  # Debug: Verificar creación del usuario
-                # Iniciar sesión automáticamente
-                login(request, user)
+                log_success(f"Usuario configurado: {user.username}")  # Debug: Verificar creación del usuario
                 return redirect("home")
             else:
                 error_message = "El formulario contiene errores. Revisa los campos."
@@ -83,7 +97,6 @@ def register_view(request):
         form = RegisterForm()
 
     return render(request, "register.html", {"form": form, "error_message": error_message})
-
 
 
 # Caso 1: Usuario no logueado, pide reset por correo

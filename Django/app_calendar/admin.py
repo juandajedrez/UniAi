@@ -2,7 +2,7 @@ from Django.utils.logger import log_debug
 log_debug("Cargando admin de app_calendar")
 
 from django.contrib import admin
-from .models import Event, Advising, Event_recurrence, Calendar
+from .models import Event, Advising, Event_recurrence
 
 
 @admin.register(Event)
@@ -29,8 +29,3 @@ class EventRecurrenceAdmin(admin.ModelAdmin):
     ordering = ("startDateTime",)
     date_hierarchy = "startDateTime"
 
-@admin.register(Calendar)
-class CalendarAdmin(admin.ModelAdmin):
-    list_display = ("user", "timeZone", "firstDay")
-    search_fields = ("user__username", "timeZone")
-    filter_horizontal = ("events", "event_recurrence", "advisings")

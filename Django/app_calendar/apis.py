@@ -1,3 +1,5 @@
+from cProfile import Profile
+
 from Django.utils.logger import log_debug
 log_debug("Cargando apis de app_calendar")
 
@@ -6,8 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden, JsonResponse
-from Django.utils.scripts import log_debug, log, log_error, log_info, log_success, remove_participants_from_event, send_notification
-from Django.utils.signals import join_event
+from Django.utils.scripts import log_debug, log, log_error, log_info, log_success
 from app_notifications.models import Notifications
 @login_required
 def accept_advising(request, advising_id):
@@ -21,7 +22,7 @@ def accept_advising(request, advising_id):
 
 @login_required
 def reject_advising(request, advising_id):
-    adv = get_object_or_404(Advising, pk=advising_id)
+    adv: Advising = get_object_or_404(Advising, pk=advising_id)
     if request.user.profile != adv.advisor:
         log_error("permiso denegado",f"el usuario {request.user.first_name} no es el docente, y no puede rechazar asesorias")
         return HttpResponseForbidden("Solo el docente puede rechazar la asesoría.")
@@ -31,14 +32,14 @@ def reject_advising(request, advising_id):
 
 @login_required
 def reject_event(request, event_id):
-    event = get_object_or_404(Event, pk=event_id)
-    profile = request.user.profile
+    event: Event = get_object_or_404(Event, pk=event_id)
+    profile: Profile = request.user.profile
     if profile in event.participants.all():
         log_info(f"el usuario {profile.user.first_name} rechazó la invitacion al evento {event.title}")
-        remove_participants_from_event(event,profile)
-        send_notification(
-            event.createdBy.user,
-            f"El usuario {profile.user.first_name} ha rechazado la invitación al evento {event.title}"
+        event.participants.remove(profile)
+        Notifications.objects.create(
+            user=event.createdBy.user,
+            message=f"El usuario {profile.user.first_name} ha rechazado la invitación al evento {event.title}"
         )
         return redirect("user_calendar")
     else:
