@@ -4,4 +4,9 @@ log_debug("Cargando urls de app_ai")
 from django.urls import path
 from . import views
 
-urlpatterns = []
+urlpatterns = [    
+    path("chat/",       views.chat_view,   name="chat"),
+    path("chat/stream/",views.chat_stream, name="chat_stream"),
+    path("chat/limpiar/",views.limpiar_chat,name="limpiar_chat"),
+    path("logout/",     views.logout_view, name="logout"),
+]

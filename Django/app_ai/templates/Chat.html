@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Helper — Asistente Académico UniQuindío</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #f0fdf4; color: #1f2937;
+      height: 100vh; display: flex; flex-direction: column;
+    }
+    header {
+      background: linear-gradient(135deg, #065f46, #10b981);
+      color: white; padding: 14px 24px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header p  { font-size: 12px; opacity: .85; }
+    .user-info { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .btn-logout {
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+      color: white; padding: 5px 12px; border-radius: 20px;
+      cursor: pointer; font-size: 12px; text-decoration: none;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.25); }
+    .main { flex: 1; display: flex; flex-direction: column; max-width: 760px; width: 100%; margin: 0 auto; padding: 0 16px; overflow: hidden; }
+    #chat-messages { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 12px; }
+    .msg { display: flex; gap: 10px; max-width: 85%; }
+    .msg.user      { align-self: flex-end;   flex-direction: row-reverse; }
+    .msg.assistant { align-self: flex-start; }
+    .bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; }
+    .msg.user .bubble      { background: #10b981; color: white; border-bottom-right-radius: 4px; }
+    .msg.assistant .bubble { background: white; color: #1f2937; border: 1px solid #d1fae5; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .typing { display: flex; gap: 4px; padding: 12px 14px; }
+    .typing span { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: bounce .9s infinite; }
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .30s; }
+    @keyframes bounce { 0%,80%,100%{transform:scale(.7);opacity:.5} 40%{transform:scale(1);opacity:1} }
+    .input-area { padding: 12px 0 8px; border-top: 1px solid #d1fae5; }
+    .input-row { display: flex; gap: 8px; }
+    #msg-input {
+      flex: 1; padding: 10px 14px; border: 1.5px solid #d1fae5;
+      border-radius: 24px; font-size: 14px; outline: none;
+      font-family: inherit; resize: none; max-height: 120px; background: white;
+    }
+    #msg-input:focus { border-color: #10b981; }
+    #send-btn {
+      background: #065f46; color: white; border: none;
+      border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; align-self: flex-end;
+    }
+    #send-btn:hover    { background: #047857; }
+    #send-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+    .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .quick-btn {
+      font-size: 12px; padding: 4px 12px; border-radius: 20px;
+      border: 1px solid #a7f3d0; background: #ecfdf5; color: #065f46;
+      cursor: pointer; white-space: nowrap;
+    }
+    .quick-btn:hover { background: #d1fae5; }
+    .map-accordion { border-top: 1px solid #d1fae5; background: white; }
+    .map-toggle {
+      width: 100%; padding: 10px 16px; background: none; border: none;
+      text-align: left; cursor: pointer; font-size: 13px; font-weight: 500;
+      color: #065f46; display: flex; align-items: center; gap: 8px;
+    }
+    .map-toggle:hover { background: #f0fdf4; }
+    .map-toggle .arrow { margin-left: auto; transition: transform .2s; }
+    .map-toggle.open .arrow { transform: rotate(180deg); }
+    #map-container { display: none; padding: 0 16px 12px; }
+    #map-container.open { display: block; }
+    #map-iframe-wrapper { border-radius: 10px; overflow: hidden; border: 2px solid #10b981; }
+    #map-iframe-wrapper iframe { display: block; width: 100%; height: 380px; border: none; }
+    .map-label { background: #065f46; color: white; padding: 7px 14px; font-size: 12px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<!-- ── Datos de Django serializados de forma segura fuera de script ── -->
+    {{ historial_json|json_script:"historial-data" }}
+    {{ ubicaciones|json_script:"ubicaciones-data" }}
+
+
+
+<!-- Config de la app como data-attributes (sin Django dentro de script) -->
+<div id="app-config"
+  data-maps-key="{{ maps_key }}"
+  data-stream-url="{% url 'chat_stream' %}"
+  hidden>
+</div>
+
+<!-- ── Header ── -->
+<header>
+  <div class="avatar">🎓</div>
+  <div>
+    <h1>Helper</h1>
+    <p>Asistente Virtual Académico · Universidad del Quindío</p>
+  </div>
+  <div class="user-info">
+    <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+    <a href="{% url 'logout' %}" class="btn-logout">Salir</a>
+  </div>
+</header>
+
+<!-- ── Chat ── -->
+<div class="main">
+  <div id="chat-messages">
+    <div class="msg assistant">
+      <div class="bubble">¡Hola{% if estudiante %}, {{ estudiante.user.first_name }}{% endif %}! Soy <strong>Helper</strong> 👋
+
+Puedo ayudarte con:
+📋 Matrícula y reinscripción
+📚 Horario y clases
+📝 Notas y calificaciones
+📍 Ubicaciones del campus
+📄 Certificados y trámites
+
+¿En qué puedo ayudarte hoy?</div>
+    </div>
+
+    {% for msg in historial %}
+    <div class="msg {{ msg.rol }}">
+      <div class="bubble">{{ msg.contenido }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="msg-input" rows="1" placeholder="Escribe tu pregunta..."></textarea>
+      <button id="send-btn" title="Enviar">➤</button>
+    </div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="sendQuick('¿Cuál es mi horario?')">Mi horario</button>
+      <button class="quick-btn" onclick="sendQuick('¿Cuáles son mis notas?')">Mis notas</button>
+      <button class="quick-btn" onclick="sendQuick('¿Quién dicta mis materias?')">Mis docentes</button>
+      <button class="quick-btn" onclick="sendQuick('¿Dónde queda la biblioteca?')">Biblioteca</button>
+      <button class="quick-btn" onclick="sendQuick('¿Cómo solicito un certificado?')">Certificados</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Mapa ── -->
+<div class="map-accordion">
+  <button class="map-toggle" id="map-toggle-btn" onclick="toggleMap()">
+    🗺️ Mapa del Campus UniQuindío
+    <span class="arrow">▼</span>
+  </button>
+  <div id="map-container">
+    <div id="map-iframe-wrapper">
+      <div class="map-label" id="map-label">🗺️ Campus Universidad del Quindío</div>
+      <iframe id="map-iframe" src="" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ── JavaScript limpio — cero Django aquí adentro ── -->
+<script>
+(function () {
+  // Leer toda la configuración desde el DOM (no desde Django inline)
+  const cfg        = document.getElementById("app-config");
+  const MAPS_KEY   = cfg.dataset.mapsKey;
+  const STREAM_URL = cfg.dataset.streamUrl;
+  const CSRF_TOKEN = document.querySelector("meta[name='csrf-token']").content;
+  const ORIGEN     = "4.55395252725635,-75.66020315188669";
+
+  // Historial desde json_script
+  let history = [];
+  try { history = JSON.parse(document.getElementById("historial-data").textContent) || []; } catch(e) {}
+
+  // Ubicaciones desde json_script
+  let UBICACIONES = {};
+  try { UBICACIONES = JSON.parse(document.getElementById("ubicaciones-data").textContent) || {}; } catch(e) {}
+
+  // Inicializar iframe del mapa con campus general
+  document.getElementById("map-iframe").src =
+    "https://www.google.com/maps/embed/v1/place?key=" + MAPS_KEY + "&q=4.554,-75.660&zoom=17";
+
+  // ── Detección de lugares ──────────────────────────────────
+  const TRIGGERS = ["donde","dónde","ubicación","ubicacion","dirección",
+    "direccion","cómo llego","como llego","queda","mapa","llegar"];
+
+  const KEYWORDS = {
+    "Biblioteca Central":                    ["biblioteca","libros","hemeroteca"],
+    "Facultad de Ingeniería":               ["ingenieria","ingeniería","sistemas","electrónica","mecatronica"],
+    "Facultad de Ciencias de la Salud":     ["salud","medicina","enfermería","enfermeria"],
+    "Edificio Administrativo":              ["administrativo","administración","rectoría"],
+    "Vicerrectoría Académica":              ["vicerrectoría","vicerrectoria","registro académico"],
+    "Facultad de Ciencias Agroindustriales":["agroindustrial","agro"],
+  };
+
+  // ── Mapa ─────────────────────────────────────────────────
+  window.toggleMap = function() {
+    const container = document.getElementById("map-container");
+    const btn       = document.getElementById("map-toggle-btn");
+    const isOpen    = container.classList.toggle("open");
+    btn.classList.toggle("open", isOpen);
+  };
+
+  function updateMap(query) {
+    const msg = query.toLowerCase();
+    if (!TRIGGERS.some(t => msg.includes(t))) return;
+    for (const [lugar, kws] of Object.entries(KEYWORDS)) {
+      if (kws.some(kw => msg.includes(kw))) {
+        const coords = UBICACIONES[lugar];
+        if (!coords) continue;
+        document.getElementById("map-iframe").src =
+          "https://www.google.com/maps/embed/v1/directions?key=" + MAPS_KEY +
+          "&origin=" + ORIGEN + "&destination=" + coords.lat + "," + coords.lng +
+          "&avoid=tolls|highways";
+        document.getElementById("map-label").textContent = "📍 Ruta → " + lugar;
+        document.getElementById("map-container").classList.add("open");
+        document.getElementById("map-toggle-btn").classList.add("open");
+        return;
+      }
+    }
+  }
+
+  // ── Chat ─────────────────────────────────────────────────
+  const messagesDiv = document.getElementById("chat-messages");
+  const input       = document.getElementById("msg-input");
+  const sendBtn     = document.getElementById("send-btn");
+
+  function addMessage(role, content) {
+    const wrap   = document.createElement("div");
+    wrap.className = "msg " + role;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = content;
+    wrap.appendChild(bubble);
+    messagesDiv.appendChild(wrap);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    return bubble;
+  }
+
+  function showTyping() {
+    const div = document.createElement("div");
+    div.className = "msg assistant";
+    div.id = "typing-indicator";
+    div.innerHTML = '<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById("typing-indicator");
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = "";
+    input.style.height = "auto";
+    sendBtn.disabled = true;
+
+    addMessage("user", text);
+    history.push({ role: "user", content: text });
+    showTyping();
+    updateMap(text);
+
+    try {
+      const res = await fetch(STREAM_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF_TOKEN },
+        body: JSON.stringify({ message: text, history: history.slice(0, -1) }),
+      });
+
+      hideTyping();
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      const bubble  = addMessage("assistant", "");
+      let fullText  = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        for (const line of decoder.decode(value).split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const data = JSON.parse(payload);
+            if (data.chunk) { fullText += data.chunk; bubble.textContent = fullText; messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+          } catch(e) { /* ignorar */ }
+        }
+      }
+      history.push({ role: "assistant", content: fullText });
+
+    } catch (err) {
+      hideTyping();
+      addMessage("assistant", "❌ Error de conexión: " + err.message);
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  window.sendQuick = function(text) { input.value = text; sendMessage(); };
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+  sendBtn.addEventListener("click", sendMessage);
+
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+})();
+</script>
+
+</body>
+</html>

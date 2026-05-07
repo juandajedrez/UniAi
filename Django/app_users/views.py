@@ -108,7 +108,9 @@ def password_reset_request_view(request):
             code = generate_reset_code()
             request.session["reset_user_id"] = user.id
             request.session["reset_code"] = code
+            log_debug(f"Generando código de recuperación para {user.username}")  # Debug: Verificar que se está generando el código
             send_reset_code(user.email, code)
+            log_debug(f"Código de recuperación generado para {user.username}: {code}")  # Debug: Verificar generación del código
             messages.success(request, "Se envió un código de verificación a tu correo.")
             return redirect("password_reset_confirm")
         except User.DoesNotExist:
