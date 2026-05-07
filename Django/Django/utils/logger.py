@@ -57,7 +57,13 @@ def title(message:str):
     else:
         pass
 
-
+def log_dic(message:str, dic:dict):
+    if DEBUG:
+        print(f"{CIAN}[LOG] {message}:{COLOR_CLOSE}")
+        for key, value in dic.items():
+            print(f"  - {key}: {value}")
+    else:
+        pass
 
 
 espace()

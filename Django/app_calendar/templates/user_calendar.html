@@ -23,6 +23,26 @@
     <li class="nav-item"><a class="nav-link {% if view == 'year' %}active{% endif %}" href="?view=year">Año</a></li>
     <li class="nav-item"><a class="nav-link {% if view == 'agenda' %}active{% endif %}" href="?view=agenda">Agenda</a></li>
   </ul>
+  <div class="d-flex justify-content-between mb-3">
+  {% if view == "month" %}
+    <a href="?view=month&start_date={{ prev_month_start|date:'Y-m-d' }}&end_date={{ prev_month_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Mes anterior</a>
+    <a href="?view=month&start_date={{ today|date:'Y-m-01' }}&end_date={{ today|date:'Y-m-t' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=month&start_date={{ next_month_start|date:'Y-m-d' }}&end_date={{ next_month_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">Mes siguiente →</a>
+  {% elif view == "week" %}
+    <a href="?view=week&start_date={{ prev_week_start|date:'Y-m-d' }}&end_date={{ prev_week_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Semana anterior</a>
+    <a href="?view=week&start_date={{ today_week_start|date:'Y-m-d' }}&end_date={{ today_week_end|date:'Y-m-d' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=week&start_date={{ next_week_start|date:'Y-m-d' }}&end_date={{ next_week_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">Semana siguiente →</a>
+  {% elif view == "day" %}
+    <a href="?view=day&target_date={{ prev_day|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Día anterior</a>
+    <a href="?view=day&target_date={{ today|date:'Y-m-d' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=day&target_date={{ next_day|date:'Y-m-d' }}" class="btn btn-outline-secondary">Día siguiente →</a>
+  {% elif view == "year" %}
+    <a href="?view=year&year={{ prev_year }}" class="btn btn-outline-secondary">← Año anterior</a>
+    <a href="?view=year&year={{ today|date:'Y' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=year&year={{ next_year }}" class="btn btn-outline-secondary">Año siguiente →</a>
+  {% endif %}
+</div>
+
 </div>
 
 
@@ -43,39 +63,40 @@
 
   <!-- Contenido dinámico según vista -->
   {% if view == 'agenda' %}
-    <!-- Agenda: lista de eventos -->
-    <table class="table table-hover">
-      <thead class="table-light">
-        <tr>
-          <th>Título</th>
-          <th>Inicio</th>
-          <th>Fin</th>
-          <th>Tipo</th>
-          <th>Estado</th>
+  <!-- Agenda: lista de eventos -->
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Título</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in agenda_events %}
+        <tr onclick="window.location='{% url 'event_detail' event.id %}'" style="cursor:pointer;">
+          <td>{{ event.title }}</td>
+          <td>{{ event.startDateTime|date:"d/m/Y H:i" }}</td>
+          <td>{{ event.endDateTime|date:"d/m/Y H:i" }}</td>
+          <td>{{ event.type }}</td>
+          <td>
+            <span class="badge 
+              {% if event.status == 'SCHEDULED' %} bg-success 
+              {% elif event.status == 'CANCELLED' %} bg-danger 
+              {% elif event.status == 'ONGOING' %} bg-warning 
+              {% else %} bg-secondary {% endif %}">
+              {{ event.status }}
+            </span>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {% for event in events %}
-          <tr onclick="window.location='{% url 'event_detail' event.id %}'" style="cursor:pointer;">
-            <td>{{ event.title }}</td>
-            <td>{{ event.startDateTime|date:"d/m/Y H:i" }}</td>
-            <td>{{ event.endDateTime|date:"d/m/Y H:i" }}</td>
-            <td>{{ event.get_type_display }}</td>
-            <td>
-              <span class="badge 
-                {% if event.status == 'SCHEDULED' %} bg-success 
-                {% elif event.status == 'CANCELLED' %} bg-danger 
-                {% elif event.status == 'ONGOING' %} bg-warning 
-                {% else %} bg-secondary {% endif %}">
-                {{ event.get_status_display }}
-              </span>
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5">No tienes eventos registrados.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      {% empty %}
+        <tr><td colspan="5">No tienes eventos registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
 
     {% elif view == 'month' %}
       <!-- Vista mensual tipo grid -->

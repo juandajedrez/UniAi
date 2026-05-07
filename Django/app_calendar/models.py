@@ -93,28 +93,5 @@ class Event_recurrence(Event):
         return f"Repetición de {self.title}"
 
 
-class Calendar(models.Model):
-    timeZone = models.CharField("Zona horaria", max_length=50)
-    user = models.OneToOneField("app_users.Profile", on_delete=models.CASCADE, verbose_name="Usuario")
-
-    DAY = [
-        ("SUNDAY", "Domingo"),
-        ("MONDAY", "Lunes"),
-        ("SATURDAY", "Sábado"),
-    ]
-    firstDay = models.CharField("Primer día de la semana", max_length=20, choices=DAY)
-
-    events = models.ManyToManyField(Event, blank=True, related_name="calendar_events", verbose_name="Eventos")
-    event_recurrence = models.ManyToManyField(Event_recurrence, blank=True, related_name="calendar_recurrences", verbose_name="Eventos recurrentes")
-    advisings = models.ManyToManyField(Advising, blank=True, related_name="calendar_advisings", verbose_name="Asesorías")
-
-    class Meta:
-        verbose_name = "Calendario"
-        verbose_name_plural = "Calendarios"
-
-    def __str__(self):
-        return f"Calendario de {self.user.user.first_name} {self.user.user.last_name}"
-
-
 
 
