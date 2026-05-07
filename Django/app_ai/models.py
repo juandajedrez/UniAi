@@ -37,6 +37,20 @@ class DocumentoRAG(models.Model):
         return f"[{self.fuente}] {self.texto[:80]}..."
 
 
+class PublicInformation(models.Model):
+    title = models.CharField(max_length=200)              # Título del documento o sección
+    category = models.CharField(max_length=100, blank=True)  # Ej: "Reglamento", "Trámite", "FAQ"
+    content = models.TextField()                          # Texto completo
+    timestamp = models.DateTimeField(auto_now_add=True)   # Fecha de creación
+    updated_at = models.DateTimeField(auto_now=True)      # Última actualización
+    status = models.CharField(max_length=20, choices=[
+        ("ACTIVE", "Activo"),
+        ("INACTIVE", "Inactivo"),
+    ], default="ACTIVE")
+
+    def __str__(self):
+        return f"{self.title} ({self.category})"
+    
 # ─────────────────────────────────────────────────────────────
 #  HISTORIAL DE CHAT
 #  Opcional: guarda las conversaciones para análisis.

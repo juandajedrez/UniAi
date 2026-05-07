@@ -39,7 +39,7 @@ def reject_event(request, event_id):
         event.participants.remove(profile)
         Notifications.objects.create(
             user=event.createdBy.user,
-            message=f"El usuario {profile.user.first_name} ha rechazado la invitación al evento {event.title}"
+            content=f"El usuario {profile.user.first_name} ha rechazado la invitación al evento {event.title}"
         )
         return redirect("user_calendar")
     else:

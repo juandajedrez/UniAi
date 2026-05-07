@@ -5,7 +5,7 @@ log_debug("Cargando views de app_ai")
 import json
 import uuid
 import logging
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from app_class.models import Department, Program
 from django.contrib.auth.decorators import login_required
 from django.http import StreamingHttpResponse, JsonResponse
@@ -16,6 +16,11 @@ from app_ai.resources.rag_service import build_context
 from app_ai.resources.llm_service import get_response_stream
 from app_chat.models import Chat, Message
 from app_users.models import Profile
+from django.conf import settings
+from sentence_transformers import SentenceTransformer
+
+embedding_model = SentenceTransformer(settings.AI_EMBEDDING_MODEL)
+
 
 logger = logging.getLogger("agente")
 
@@ -26,7 +31,21 @@ logger = logging.getLogger("agente")
 
 @login_required
 def chat_view(request):
-    chat, _ = Chat.objects.get_or_create(name="Chat-Helper")
+
+    # Buscar o crear el chat
+    helper_user, _ = User.objects.get_or_create(username="4511", defaults={"first_name": "Helper"})
+    # Buscar si ya existe un chat entre el usuario actual y el otro
+    chat = Chat.objects.filter(users=request.user).filter(users=helper_user).first()
+
+    if not chat:
+        # Crear nuevo chat 1 a 1
+        chat = Chat.objects.create(
+            description=f"Chat entre {request.user.first_name} y {helper_user.first_name}",
+            state="active",  # ajusta según tu modelo
+            icon="https://cdn-icons-png.flaticon.com/512/1384/1384055.png"  # ícono por defecto
+        )
+        chat.users.add(request.user, helper_user)
+
     chat.users.add(request.user)
 
     if request.method == "POST":
@@ -45,12 +64,14 @@ def chat_view(request):
     return render(request, "chat.html", {
         "messages": messages,
         "user": request.user,
+        "maps_key":      _get_maps_key(),
+        "ubicaciones":   _get_ubicaciones_dict(),
     })
 
 
 def get_chat_messages(user):
     # Buscar el usuario Helper
-    helper_user = User.objects.get(username="helper")
+    helper_user = User.objects.get(username="4511")
 
     # Buscar el chat donde están el user y Helper
     chat = Chat.objects.filter(users=user).filter(users=helper_user).first()
@@ -85,13 +106,17 @@ def chat_stream(request):
     profile = request.user.profile
 
     # Buscar o crear el chat
-    chat, _ = Chat.objects.get_or_create(name=f"Chat-{sesion_id}")
-    chat.users.add(request.user)
-
-    # Asegurar que Helper exista y esté en el chat
-    from django.contrib.auth.models import User
-    helper_user, _ = User.objects.get_or_create(username="5411", defaults={"first_name": "Helper"})
-    chat.users.add(helper_user)
+    helper_user, _ = User.objects.get_or_create(username="4511", defaults={"first_name": "Helper"})
+    # Buscar si ya existe un chat entre el usuario actual y el otro
+    chat = Chat.objects.filter(users=request.user).filter(users=helper_user).first()
+    if not chat:
+        # Crear nuevo chat 1 a 1
+        chat = Chat.objects.create(
+            description=f"Chat entre {request.user.first_name} y {helper_user.first_name}",
+            state="active",  # ajusta según tu modelo
+            icon="https://cdn-icons-png.flaticon.com/512/1384/1384055.png"  # ícono por defecto
+        )
+        chat.users.add(request.user, helper_user)
 
     # Guardar mensaje del usuario en DB
     Message.objects.create(

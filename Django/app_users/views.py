@@ -105,19 +105,26 @@ def password_reset_request_view(request):
         username = request.POST.get("username")
         try:
             user = User.objects.get(username=username)
+            
+            
+            log_debug(f"Generando código de recuperación para {user.username}")  # Debug: Verificar que se está generando el código
             code = generate_reset_code()
             request.session["reset_user_id"] = user.id
             request.session["reset_code"] = code
-            log_debug(f"Generando código de recuperación para {user.username}")  # Debug: Verificar que se está generando el código
-            send_reset_code(user.email, code)
             log_debug(f"Código de recuperación generado para {user.username}: {code}")  # Debug: Verificar generación del código
-            messages.success(request, "Se envió un código de verificación a tu correo.")
+            try:
+                log_info(f"Enviando código de recuperación a {user.username} ({user.email})")  # Debug: Verificar que se está enviando el correo
+                send_reset_code(user.email, code)
+                log_success(f"Código de recuperación enviado a {user.username} ({user.email})")  # Debug: Verificar que se ha enviado el correo
+            except Exception as e:
+                log_error(f"Error al enviar código de recuperación a {user.username} ({user.email})", e)
+                messages.error(request, "Error al enviar el código de recuperación.")
             return redirect("password_reset_confirm")
         except User.DoesNotExist:
             messages.error(request, "No existe un usuario con ese nombre de usuario.")
     return render(request, "password_reset_request.html")
 
-def password_reset_confirm_view(request):
+def password_reset_confirm_view(request): # Debug: Verificar que se están recibiendo los datos del formulario
     if request.method == "POST":
         code = request.POST.get("code")
         new_password = request.POST.get("new_password")

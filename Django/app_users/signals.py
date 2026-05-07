@@ -1,3 +1,7 @@
+
+
+
+
 from Django.utils.logger import log_debug, log_error, log_info, log_success
 log_debug("Cargando signals.py en app_users")
 
@@ -9,7 +13,6 @@ from .models import *
 from app_notifications.models import Notifications
 from app_chat.models import Chat
 from django.core.mail import send_mail
-import profile
 
 # -----------------------------
 # Señales personalizadas
@@ -57,12 +60,7 @@ def on_socialmedia_deleted(sender, instance: SocialMedia, **kwargs):
 
 @receiver(user_registered)
 def on_user_registered(sender, profile:Profile, **kwargs):
-    try:
-        log_debug(f"Creando calendario para el nuevo usuario: {profile.user.username}")
-        Calendar.objects.create(user=profile, timeZone="UTC", firstDay="MONDAY")
-    except Exception as e:
-        raise ValueError(f"Error al crear calendario para {profile.user.username}: {e}")
-
+    
     "Pendiente: Crear IA para el usuario"
 
     #Enviar notificacion para cambiar contraseña
@@ -78,7 +76,7 @@ def on_user_registered(sender, profile:Profile, **kwargs):
         )
         
     except Exception as e:
-        log_error(f"Error al crear notificaciones para {profile.user.username}: {e}")
+        log_error(f"Error al crear notificaciones para {profile.user.username}", e)
 
     #Crear chat con sigo mismo para guardar mensajes importantes
     chat: Chat = Chat.objects.create(description=f"Chat de {profile.user.first_name}", state="ACTIVE")
@@ -92,7 +90,7 @@ def on_user_registered(sender, profile:Profile, **kwargs):
         )
         log_info(f"Correo de bienvenida enviado a {profile.user.username} ({profile.user.email})")
     except Exception as e:
-        log_error(f"Error al enviar correo de bienvenida a {profile.user.username}: {e}")
+        log_error(f"Error al enviar correo de bienvenida a {profile.user.username}", e)
     log_success(f"Nuevo usuario registrado: {profile.user.username} ({profile.user.email})")
 
 @receiver(user_profile_updated)
@@ -114,7 +112,7 @@ def on_user_registered_error(sender, profile:Profile, **kwargs):
     try:
         profile.user.delete()
     except Exception as e:
-        log_error(f"Error al eliminar usuario {profile.user.username}: {e}")
+        log_error(f"Error al eliminar usuario {profile.user.username}", e)
 
 # ------------------ User ----------------------------
 @receiver(post_save, sender=User)

@@ -124,7 +124,7 @@ Puedo ayudarte con:
     </div>
 
     {% for msg in messages %}
-    <div class="msg {{ msg.rol }}">
+    <div class="msg {% if msg.sender.username == '4511' %}assistant{% else %}user{% endif %}">
       <div class="bubble">{{ msg.content }}</div>
     </div>
     {% endfor %}
@@ -159,9 +159,7 @@ Puedo ayudarte con:
   </div>
 </div>
 
- {% endblock %}
 
- {% block scripts %}
 <!-- ── JavaScript limpio — cero Django aquí adentro ── -->
 <script>
 (function () {
