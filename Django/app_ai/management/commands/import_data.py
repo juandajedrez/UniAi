@@ -11,9 +11,9 @@ Uso:
     python manage.py import_data --limpiar   # borra datos previos antes de importar
 
 Archivos que lee:
-    data/documents/horario.txt
-    data/documents/notas.txt
-    data/documents/docentes.txt
+    ../data/documents/horario.txt
+    ../data/documents/notas.txt
+    ../data/documents/docentes.txt
 """
 
 import re
@@ -22,6 +22,7 @@ from pathlib import Path
 from datetime import datetime, time
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
+from django.conf import settings
 
 logger = logging.getLogger("scraper")
 
@@ -31,7 +32,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--dir", type=str, default="data/documents",
+            "--dir", type=str, default="../data/documents",
             help="Directorio con los archivos .txt (default: data/documents)"
         )
         parser.add_argument(
@@ -99,7 +100,7 @@ class Command(BaseCommand):
     # ─────────────────────────────────────────────────────────
 
     def _get_o_crear_estudiante(self, correo: str | None):
-        from ..models import Estudiante
+        from ...models import Estudiante
 
         if correo:
             try:
@@ -161,7 +162,7 @@ class Command(BaseCommand):
     }
 
     def _importar_horario(self, estudiante, path: Path) -> int:
-        from ..models import Horario
+        from ...models import Horario
 
         text  = path.read_text(encoding="utf-8")
         items = self._parse_horario(text)
@@ -292,7 +293,7 @@ class Command(BaseCommand):
     # ─────────────────────────────────────────────────────────
 
     def _importar_notas(self, estudiante, path: Path) -> int:
-        from ..models import Nota
+        from ...models import Nota
 
         text    = path.read_text(encoding="utf-8")
         items   = self._parse_notas(text)
@@ -365,7 +366,7 @@ class Command(BaseCommand):
     # ─────────────────────────────────────────────────────────
 
     def _importar_docentes(self, path: Path) -> int:
-        from ..models import Docente
+        from ...models import Docente
 
         text  = path.read_text(encoding="utf-8")
         items = self._parse_docentes(text)

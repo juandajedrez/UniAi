@@ -1,4 +1,6 @@
 """
+rag_service.py — RAG desde PostgreSQL
+Reemplaza rag_pipeline.py: en lugar de leer .txt y buscar en FAISS,
 consulta directamente los modelos Django con el ORM.
 """
 
@@ -35,50 +37,73 @@ KEYWORDS_UBICACION = [
 
 def build_context(estudiante, query: str) -> str:
     """
-    Construye el contexto para el sistema RAG consultando PostgreSQL.
-    Detecta el tipo de consulta y devuelve el texto relevante.
-
-    Args:
-        estudiante: instancia de Estudiante (o None si no está autenticado)
-        query: pregunta del usuario
-
-    Returns:
-        String con el contexto a inyectar en el system prompt
+    Construye el contexto completo del estudiante desde PostgreSQL.
+    Siempre incluye: perfil, horario, notas y docentes.
+    No depende de palabras clave — el modelo decide qué usar.
     """
+    if not estudiante:
+        logger.warning("RAG — Sin estudiante vinculado. Solo información pública.")
+        return _get_public_context(query) or "Contexto institucional no disponible."
+
+    logger.info(f"RAG — Cargando datos completos de: {estudiante}")
+
+    secciones: list[str] = []
+
+    # ── 1. Perfil del estudiante ──────────────────────────────
+    perfil = _get_perfil_context(estudiante)
+    if perfil:
+        secciones.append(perfil)
+
+    # ── 2. Horario completo ───────────────────────────────────
+    horario = _get_horario_context(estudiante, query.lower())
+    if horario:
+        secciones.append(horario)
+
+    # ── 3. Notas completas ────────────────────────────────────
+    notas = _get_notas_context(estudiante)
+    if notas:
+        secciones.append(notas)
+
+    # ── 4. Docentes de sus materias ───────────────────────────
+    docentes = _get_docentes_context(estudiante)
+    if docentes:
+        secciones.append(docentes)
+
+    # ── 5. Información pública (solo si la pregunta lo requiere)
     query_lower = query.lower()
-    contextos: list[str] = []
+    temas_publicos = [
+        "matrícula", "matricula", "certificado", "reglamento",
+        "faq", "pregunta", "trámite", "tramite", "beca", "bienestar",
+    ]
+    if any(t in query_lower for t in temas_publicos):
+        pub = _get_public_context(query)
+        if pub:
+            secciones.append(pub)
 
-    # ── Datos personales del estudiante ──────────────────────
-    if estudiante:
+    if not secciones:
+        return "No se encontró información en la base de datos para este estudiante."
 
-        # Horario
-        if any(k in query_lower for k in KEYWORDS_HORARIO):
-            ctx = _get_horario_context(estudiante, query_lower)
-            if ctx:
-                contextos.append(ctx)
+    logger.info(f"RAG — {len(secciones)} secciones de contexto cargadas.")
+    return "\n\n---\n\n".join(secciones)
 
-        # Notas
-        if any(k in query_lower for k in KEYWORDS_NOTAS):
-            ctx = _get_notas_context(estudiante)
-            if ctx:
-                contextos.append(ctx)
 
-        # Docentes
-        if any(k in query_lower for k in KEYWORDS_DOCENTES):
-            ctx = _get_docentes_context(estudiante)
-            if ctx:
-                contextos.append(ctx)
-
-    # ── Información pública institucional (búsqueda semántica) ─
-    if not contextos or any(k in query_lower for k in ["matrícula", "matricula", "certificado", "reglamento", "faq"]):
-        ctx = _get_public_context(query)
-        if ctx:
-            contextos.append(ctx)
-
-    if not contextos:
-        return "No se encontró información específica para esta consulta."
-
-    return "\n\n---\n\n".join(contextos)
+def _get_perfil_context(estudiante) -> str:
+    """Retorna el perfil completo del estudiante."""
+    user = estudiante.user
+    lineas = ["Perfil del estudiante:"]
+    lineas.append(f"Nombre: {user.get_full_name() or user.username}")
+    if estudiante.documento:
+        lineas.append(f"Documento: {estudiante.documento}")
+    if estudiante.programa:
+        lineas.append(f"Programa: {estudiante.programa}")
+    if estudiante.semestre:
+        lineas.append(f"Semestre: {estudiante.semestre}")
+    if estudiante.sede:
+        lineas.append(f"Sede: {estudiante.sede}")
+    if estudiante.correo_inst:
+        lineas.append(f"Correo institucional: {estudiante.correo_inst}")
+    logger.info(f"RAG perfil — cargado para {user.get_full_name()}")
+    return "\n".join(lineas)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -89,10 +114,9 @@ def _get_horario_context(estudiante, query_lower: str) -> str:
     """Retorna el horario del estudiante desde la DB."""
     from ..models import Horario
 
-    # Si pregunta por una materia específica, filtrar
     horarios = Horario.objects.filter(estudiante=estudiante)
+    logger.info(f"RAG horario — encontrados: {horarios.count()} registros para {estudiante}")
 
-    # Detectar si pregunta por un día específico
     dias_map = {
         "lunes": "Lunes", "martes": "Martes", "miércoles": "Miércoles",
         "miercoles": "Miércoles", "jueves": "Jueves",
@@ -110,7 +134,6 @@ def _get_horario_context(estudiante, query_lower: str) -> str:
     for h in horarios:
         lineas.append(h.as_context_text())
 
-    logger.info(f"RAG horario: {horarios.count()} registros")
     return "\n".join(lineas)
 
 
@@ -119,6 +142,7 @@ def _get_notas_context(estudiante) -> str:
     from ..models import Nota
 
     notas = Nota.objects.filter(estudiante=estudiante)
+    logger.info(f"RAG notas — encontradas: {notas.count()} materias para {estudiante}")
 
     if not notas.exists():
         return "No se encontraron notas registradas."
@@ -127,7 +151,6 @@ def _get_notas_context(estudiante) -> str:
     for n in notas:
         lineas.append(n.as_context_text())
 
-    logger.info(f"RAG notas: {notas.count()} materias")
     return "\n".join(lineas)
 
 

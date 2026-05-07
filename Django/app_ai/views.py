@@ -44,7 +44,6 @@ logger = logging.getLogger("agente")
 @login_required
 def chat_view(request):
     """Renderiza la interfaz del chat."""
-    log_debug(f"Accediendo a chat_view con usuario {request.user.username}")
     estudiante = _get_estudiante(request.user)
     sesion_id  = request.session.get("chat_sesion_id") or str(uuid.uuid4())
     request.session["chat_sesion_id"] = sesion_id
@@ -52,20 +51,12 @@ def chat_view(request):
     import json
 
     historial = MensajeChat.objects.filter(sesion_id=sesion_id).order_by("created_at")
-    log_debug(f"Historial para sesión {sesion_id}: {historial.count()} mensajes")
-
-    # historial_json = json.dumps([
-    #     {"role": msg.rol, "content": msg.contenido}
-    #     for msg in historial
-    # ], ensure_ascii=False
-    # )
     
     historial_json =[
         {"role": msg.rol, "content": msg.contenido}
         for msg in historial
     ]
-    log_debug(f"Historial JSON: {historial_json[:20]}...")  # Log de los primeros 100 caracteres
-
+    
     context = {
         "estudiante":    estudiante,
         "historial":     historial,
@@ -74,7 +65,6 @@ def chat_view(request):
         "maps_key":      _get_maps_key(),
         "ubicaciones":   _get_ubicaciones_dict(),   # dict, no string
     }
-    log_debug(f"Contexto para render: {context.keys()}")
     return render(request, "Chat.html", context)
 
 
@@ -186,12 +176,38 @@ def logout_view(request):
 #  UTILIDADES PRIVADAS
 # ─────────────────────────────────────────────────────────────
 
-def _get_estudiante(user) -> Estudiante | None:
-    """Obtiene el perfil Estudiante del usuario o None."""
+def _get_estudiante(user) -> "Estudiante | None":
+    """
+    Obtiene el perfil Estudiante del usuario autenticado.
+    Fallback: en desarrollo, usa el primer Estudiante de la DB
+    si el usuario no tiene uno vinculado todavía.
+    """
+    from django.conf import settings
+ 
+    # Intento 1: relación directa OneToOneField
     try:
         return user.estudiante
-    except Estudiante.DoesNotExist:
-        return None
+    except Exception:
+        pass
+ 
+    # Intento 2: buscar por email
+    try:
+        return Estudiante.objects.get(user__email=user.email)
+    except Exception:
+        pass
+ 
+    # Intento 3 (solo en DEBUG): usar el primer estudiante de la DB
+    if getattr(settings, "DEBUG", False):
+        est = Estudiante.objects.first()
+        if est:
+            import logging
+            logging.getLogger("agente").warning(
+                f"Usuario {user.username} sin Estudiante vinculado. "
+                f"Usando {est} como fallback de desarrollo."
+            )
+            return est
+ 
+    return None
 
 
 def _get_maps_key() -> str:

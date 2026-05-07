@@ -143,13 +143,13 @@ GOOGLE_MAPS_KEY = os.getenv("GOOGLE_MAPS_KEY", "")
 # ─────────────────────────────────────────────────────────────
  
 AI_EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-AI_DOCS_DIR        = BASE_DIR / "data" / "documents"
-AI_FAISS_DIR       = BASE_DIR / "data" / "faiss_index"
+AI_DOCS_DIR        = BASE_DIR / "app_ai" / "data" / "documents"
+AI_FAISS_DIR       = BASE_DIR / "app_ai" / "data" / "faiss_index"
  
 # ─────────────────────────────────────────────────────────────
 #  DIRECTORIOS DE DATOS (se crean si no existen)
 # ─────────────────────────────────────────────────────────────
  
-for _dir in [AI_DOCS_DIR, AI_FAISS_DIR, BASE_DIR / "data" / "logs"]:
+for _dir in [AI_DOCS_DIR, AI_FAISS_DIR, BASE_DIR / "app_ai" / "data" / "logs"]:
     _dir.mkdir(parents=True, exist_ok=True)
  
