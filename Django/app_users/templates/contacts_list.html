@@ -11,6 +11,11 @@
             <button class="btn btn-outline-success" type="submit">
                 <i class="bi bi-search"></i> Buscar
             </button>
+            {% if user.is_staff %}
+            <a href="{% url 'register' %}" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-person-plus"></i> Nuevo
+            </a>
+            {% endif %}
         </div>
 
     </form>

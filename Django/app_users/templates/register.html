@@ -1,0 +1,25 @@
+{% extends "home.html" %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+                <h2 class="mb-0">Nuevo usuario</h2>
+        </div>   
+        {% if error_message %}
+        <div class="alert alert-danger">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        <form method="post" class="card p-4 shadow">
+            <h4>Datos de Usuario</h4>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success mt-3">Registrar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

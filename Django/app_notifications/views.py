@@ -1,6 +1,14 @@
-from django.shortcuts import render, get_object_or_404
+from Django.utils.logger import log_debug
+log_debug("Cargando views de app_notifications")
+
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Notifications
+from .models import *
+from django.http import HttpResponseForbidden
+from app_class.models import Course
+from app_users.models import Profile
+from .forms import *
+
 
 # Lista de notificaciones del usuario
 @login_required
@@ -25,3 +33,57 @@ def unread_notifications(request):
         count = Notifications.objects.filter(user=request.user, status="RECEIVED").count()
         return {"unread_count": count}
     return {"unread_count": 0}
+
+
+
+# Ver anuncios del curso
+@login_required
+def course_ads(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    ads = AdvertisementCourse.objects.filter(community=course, status="ACTIVE").order_by("-timestamp")
+    return render(request, "course_ads.html", {"course": course, "ads": ads})
+
+# Redactar anuncio del curso (solo docentes)
+@login_required
+def create_course_ad(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    profile = get_object_or_404(Profile, user=request.user)
+
+    # Solo docentes del curso pueden crear anuncios
+    if profile not in course.teachers.all():
+        return HttpResponseForbidden("No tienes permisos para crear anuncios en este curso.")
+
+    if request.method == "POST":
+        form = AdvertisementCourseForm(request.POST)
+        if form.is_valid():
+            ad = form.save(commit=False)
+            ad.community = course
+            ad.save()
+            return redirect("course_ads", course_id=course.id)
+    else:
+        form = AdvertisementCourseForm()
+
+    return render(request, "create_course_ad.html", {"course": course, "form": form})
+
+@login_required
+def advertisement_list(request):
+    advertisements = None
+    if request.user.is_staff or request.user.is_superuser:
+        advertisements = Advertisement.objects.filter(status="ACTIVE")
+        return render(request, "advertisement_list.html", {"advertisements": advertisements, "is_superuser":True})
+    else:
+        advertisements = Advertisement.objects.filter(status="ACTIVE", community=request.user.profile.role)
+        global_ads = Advertisement.objects.filter(status="ACTIVE", community="GLOBAL")
+        advertisements_final = advertisements.union(global_ads)
+    return render(request, "advertisement_list.html", {"advertisements": advertisements_final, "is_superuser": False})
+
+@login_required
+def create_advertisement(request):
+    if request.method == "POST":
+        form = AdvertisementForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("advertisement_list")
+    else:
+        form = AdvertisementForm()
+    return render(request, "advertisement_form.html", {"form": form})

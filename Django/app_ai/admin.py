@@ -1,3 +1,3 @@
 from django.contrib import admin
-
-# Register your models here.
+from Django.utils.logger import log_debug
+log_debug("Cargando admin de app_ai")

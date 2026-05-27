@@ -1,0 +1,74 @@
+[
+  {
+    "codigo": "12241",
+    "curso": "ARQUITECTURA ORIENTADA A MICROSERVICIOS",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "00 - (25%)",
+      "nota2": "00 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "0.00"
+    }
+  },
+  {
+    "codigo": "12219",
+    "curso": "INTRODUCCIÓN AL BIG DATA",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "00 - (25%)",
+      "nota2": "00 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "0.00"
+    }
+  },
+  {
+    "codigo": "12352",
+    "curso": "ADMINISTRACIÓN",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "00 - (25%)",
+      "nota2": "00 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "0.00"
+    }
+  },
+  {
+    "codigo": "12348",
+    "curso": "INTELIGENCIA ARTIFICIAL",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "4.34.3 - (25%)",
+      "nota2": "00 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "1.10"
+    }
+  },
+  {
+    "codigo": "12348",
+    "curso": "INTELIGENCIA ARTIFICIAL",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "4.34.3 - (25%)",
+      "nota2": "00 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "1.10"
+    }
+  },
+  {
+    "codigo": "12347",
+    "curso": "ADMINISTRACIÓN DE PROYECTOS",
+    "seccion": "01D",
+    "notas": {
+      "nota1": "4.14.1 - (25%)",
+      "nota2": "55 - (25%)",
+      "nota3": "00 - (25%)",
+      "seguimiento": "00 - (25%)",
+      "definitiva": "2.30"
+    }
+  }
+]

@@ -35,6 +35,12 @@ body {
 .nav-item.dropdown:hover .dropdown-menu {
   display: block;
 }
+.dropdown-menu {
+  right: 0 !important;          /* lo pega al borde derecho */
+  left: auto !important;        /* evita que se expanda hacia la izquierda */
+  max-width: 90vw !important;   /* nunca más ancho que la pantalla */
+  overflow-wrap: break-word !important; /* corta texto largo */
+}
 
 .nav-link.active i,
 
@@ -76,7 +82,7 @@ body {
 
 /* Forzar contraste en el container */
 .container {
-    color: #f0fff0 !important;
+    color: #f0fff0 !important; /* verde muy claro para todo el texto dentro del contenedor */
 }
 
 .container h1 {
@@ -106,4 +112,89 @@ body {
 .logout-btn:hover {
     background: #2563eb;
     transform: scale(1.05);
+}
+
+/* Estilo para ítems de aulas */
+.classroom-item {
+  background-color: #f8f9fa; /* gris muy claro */
+  color: #000000;           /* texto negro para contraste */
+  border: 1px solid #dee2e6; /* borde sutil */
+}
+
+.classroom-item strong {
+  color: #065f46; /* verde oscuro solo para resaltar */
+}
+
+.calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+}
+
+.calendar-cell {
+  border: 1px solid #065f46 !important;
+  border-radius: 4px !important;
+  padding: 6px !important;
+  min-height: 120px !important;
+  background-color: #ffffff !important;
+}
+
+.calendar-cell strong {
+  display: block !important;
+  margin-bottom: 4px !important;
+  font-size: 0.9rem !important;
+}
+
+.calendar-cell ul {
+  padding-left: 0 !important;
+  list-style: none !important;
+  margin: 0 !important;
+}
+
+.calendar-cell li {
+  font-size: 0.8rem !important;
+  margin-bottom: 2px !important;
+}
+
+.calendar-cell a {
+  text-decoration: none !important;
+  color: #198754 !important;
+}
+
+.calendar-cell a:hover {
+  text-decoration: underline !important;
+}
+
+.text-muted {
+  color: #adb5bd !important;
+}
+
+/* Aislar estilos solo dentro de calendar-section */
+.calendar-section .calendar-tabs .nav-link {
+  background-color: #fdfdfd; /* fondo blanco */
+  border: 1px solid #ccc;
+  color: #333 !important; /* texto gris oscuro */
+  margin-right: 4px;
+  border-radius: 4px 4px 0 0;
+  padding: 8px 12px;
+  font-weight: 500;
+}
+
+.calendar-section .calendar-tabs .nav-link.active {
+  background-color: #198754; /* azul activo */
+  color: #fff !important; /* texto blanco */
+  border-color: #198754;
+}
+
+.calendar-section .calendar-tabs .nav-link:hover {
+  background-color: #e9ecef; /* gris claro al hover */
+  color: #198754 !important;
+}
+
+.calendar-header {
+  text-align: center;
+  font-weight: bold;
+  padding: 8px;
+  background-color: #198754 !important; /* gris claro */
+  border: 1px solid #dee2e6;
 }

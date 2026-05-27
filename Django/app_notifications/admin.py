@@ -1,5 +1,9 @@
+from Django.utils.logger import log_debug
+log_debug("Cargando admin de app_notifications")
+
 from django.contrib import admin
 from .models import Notifications, Advertisement, AdvertisementCourse
+
 
 # --- Admin para Notifications ---
 @admin.register(Notifications)

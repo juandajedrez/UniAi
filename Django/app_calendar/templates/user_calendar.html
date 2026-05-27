@@ -1,0 +1,192 @@
+{% extends "home.html" %}
+{% block title %}Mi Calendario{% endblock %}
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Encabezado -->
+
+
+  <div class="card shadow">
+    <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Calendario</h2>
+            <a href="{% url 'create_event' %}" class="btn btn-secondary">+ Crear Evento</a>
+        </div>
+    </div>
+  </div>
+<div class="calendar-section">
+  <!-- Tabs de visualización -->
+  <ul class="calendar-tabs nav nav-tabs mb-3" id="calendarTabs">
+    <li class="nav-item"><a class="nav-link {% if view == 'month' %}active{% endif %}" href="?view=month">Mes</a></li>
+    <li class="nav-item"><a class="nav-link {% if view == 'week' %}active{% endif %}" href="?view=week">Semana</a></li>
+    <li class="nav-item"><a class="nav-link {% if view == 'day' %}active{% endif %}" href="?view=day">Día</a></li>
+    <li class="nav-item"><a class="nav-link {% if view == 'year' %}active{% endif %}" href="?view=year">Año</a></li>
+    <li class="nav-item"><a class="nav-link {% if view == 'agenda' %}active{% endif %}" href="?view=agenda">Agenda</a></li>
+  </ul>
+  <div class="d-flex justify-content-between mb-3">
+  {% if view == "month" %}
+    <a href="?view=month&start_date={{ prev_month_start|date:'Y-m-d' }}&end_date={{ prev_month_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Mes anterior</a>
+    <a href="?view=month&start_date={{ today|date:'Y-m-01' }}&end_date={{ today|date:'Y-m-t' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=month&start_date={{ next_month_start|date:'Y-m-d' }}&end_date={{ next_month_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">Mes siguiente →</a>
+  {% elif view == "week" %}
+    <a href="?view=week&start_date={{ prev_week_start|date:'Y-m-d' }}&end_date={{ prev_week_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Semana anterior</a>
+    <a href="?view=week&start_date={{ today_week_start|date:'Y-m-d' }}&end_date={{ today_week_end|date:'Y-m-d' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=week&start_date={{ next_week_start|date:'Y-m-d' }}&end_date={{ next_week_end|date:'Y-m-d' }}" class="btn btn-outline-secondary">Semana siguiente →</a>
+  {% elif view == "day" %}
+    <a href="?view=day&target_date={{ prev_day|date:'Y-m-d' }}" class="btn btn-outline-secondary">← Día anterior</a>
+    <a href="?view=day&target_date={{ today|date:'Y-m-d' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=day&target_date={{ next_day|date:'Y-m-d' }}" class="btn btn-outline-secondary">Día siguiente →</a>
+  {% elif view == "year" %}
+    <a href="?view=year&year={{ prev_year }}" class="btn btn-outline-secondary">← Año anterior</a>
+    <a href="?view=year&year={{ today|date:'Y' }}" class="btn btn-outline-primary">Hoy</a>
+    <a href="?view=year&year={{ next_year }}" class="btn btn-outline-secondary">Año siguiente →</a>
+  {% endif %}
+</div>
+
+</div>
+
+
+  <!-- Barra de búsqueda y filtros -->
+  <form method="get" class="d-flex mb-3">
+    <input type="hidden" name="view" value="{{ view }}">
+    <input type="text" name="q" class="form-control me-2" placeholder="Buscar eventos..." value="{{ request.GET.q }}">
+    <select name="type" class="form-select me-2">
+      <option value="">Todos los tipos</option>
+      <option value="CLASS">Clase</option>
+      <option value="EXAM">Examen</option>
+      <option value="MEETING">Reunión</option>
+      <option value="ADVISING">Asesoría</option>
+      <option value="OTHER">Otro</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </form>
+
+  <!-- Contenido dinámico según vista -->
+  {% if view == 'agenda' %}
+  <!-- Agenda: lista de eventos -->
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Título</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in agenda_events %}
+        <tr onclick="window.location='{% url 'event_detail' event.id %}'" style="cursor:pointer;">
+          <td>{{ event.title }}</td>
+          <td>{{ event.startDateTime|date:"d/m/Y H:i" }}</td>
+          <td>{{ event.endDateTime|date:"d/m/Y H:i" }}</td>
+          <td>{{ event.type }}</td>
+          <td>
+            <span class="badge 
+              {% if event.status == 'SCHEDULED' %} bg-success 
+              {% elif event.status == 'CANCELLED' %} bg-danger 
+              {% elif event.status == 'ONGOING' %} bg-warning 
+              {% else %} bg-secondary {% endif %}">
+              {{ event.status }}
+            </span>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">No tienes eventos registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+    {% elif view == 'month' %}
+      <!-- Vista mensual tipo grid -->
+  <div class="calendar-grid">
+    <!-- Encabezado con nombres de días -->
+    <div class="calendar-header">Lunes</div>
+    <div class="calendar-header">Martes</div>
+    <div class="calendar-header">Miércoles</div>
+    <div class="calendar-header">Jueves</div>
+    <div class="calendar-header">Viernes</div>
+    <div class="calendar-header">Sábado</div>
+    <div class="calendar-header">Domingo</div>
+
+    <!-- Celdas de días -->
+    {% for week in month_days %}
+      {% for day in week %}
+        <div class="calendar-cell {% if day.date.month != current_month %}text-muted{% endif %}">
+          <h5>{{ day.date|date:"d" }}</h5>
+          <ul>
+            {% for event in day.events %}
+              <li>
+                <a href="{% url 'event_detail' event.id %}">
+                  {{ event.title }}
+                </a>
+              </li>
+            {% empty %}
+              <li class="text-muted">Sin eventos</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+
+
+
+  {% elif view == 'week' %}
+    <!-- Vista semanal -->
+    <div class="row">
+      {% for day in week_days %}
+        <div class="col border p-2">
+          <h5>{{ day.date|date:"D d M" }}</h5>
+          <ul class="list-unstyled">
+            {% for event in day.events %}
+              <li><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></li>
+            {% empty %}
+              <li class="text-muted">Sin eventos</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  
+
+  {% elif view == 'day' %}
+    <!-- Vista diaria -->
+     
+    <h5>{{ day_date|date:"l d M Y" }}</h5>
+    <ul class="list-group">
+      {% for event in day_events %}
+        <li class="list-group-item">
+          <a href="{% url 'event_detail' event.id %}">{{ event.title }}</a>
+          <span class="text-muted">({{ event.startDateTime|date:"H:i" }} - {{ event.endDateTime|date:"H:i" }})</span>
+        </li>
+      {% empty %}
+        <li class="list-group-item">No hay eventos este día.</li>
+      {% endfor %}
+    </ul>
+
+  {% elif view == 'year' %}
+    <!-- Vista anual -->
+    <div class="row">
+      {% for month in year_months %}
+        <div class="col-md-3 mb-3">
+          <div class="card">
+            <div class="card-header">{{ month.name }}</div>
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for event in month.events %}
+                  <li><a href="{% url 'event_detail' event.id %}">{{ event.title }}</a></li>
+                {% empty %}
+                  <li class="text-muted">Sin eventos</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

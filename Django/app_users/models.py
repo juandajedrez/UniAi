@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from Django.utils.logger import log_debug
+log_debug("Cargando modelos de app_users")
+
 # ==========================
 # USERS
 # ==========================
@@ -10,7 +13,6 @@ class Profile(models.Model):
         ("TEACHER", "Profesor"),
         ("ADMIN", "Administrativo"),
         ("STUDENT", "Estudiante"),
-        ("IA","IA"),
     ]
     photo = models.TextField(default="https://img.freepik.com/vector-premium/icono-usuario-establece-perfil-social-simbolo-vectorial-avatar-persona-cuenta-signo-web_268104-14523.jpg?semt=ais_hybrid&w=740&q=80")
     user = models.OneToOneField(

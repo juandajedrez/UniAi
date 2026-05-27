@@ -1,0 +1,31 @@
+{% extends "home.html" %}
+{% block title %}Mis Cursos{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-3">Mis Cursos</h2>
+        </div>
+    </div>
+  <div class="row">
+    {% for course in courses %}
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ course.name }}</h5>
+            <p class="card-text text-muted">
+              {{ course.description|truncatewords:20 }}
+            </p>
+            <div class="mt-auto">
+              <a href="{% url 'course_detail' course.id %}" class="btn btn-success">Entrar al curso</a>
+              <a href="{% url 'course_participants' course.id %}" class="btn btn-outline-secondary ">Participantes</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No estás inscrito en ningún curso.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

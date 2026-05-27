@@ -1,20 +1,31 @@
-from django.contrib import admin
-from .models import Event, Calendar
+from Django.utils.logger import log_debug
+log_debug("Cargando admin de app_calendar")
 
-# --- Admin para Event ---
+from django.contrib import admin
+from .models import Event, Advising, Event_recurrence
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "startDateTime", "endDateTime", "location", "status", "createdBy")
-    search_fields = ("title", "description", "location", "createdBy__username")
-    list_filter = ("status", "location", "startDateTime", "endDateTime")
+    list_display = ("title", "startDateTime", "endDateTime", "location", "type", "status", "createdBy")
+    list_filter = ("type", "status", "createdBy")
+    search_fields = ("title", "description", "location")
+    ordering = ("startDateTime",)
+    date_hierarchy = "startDateTime"
 
-# --- Admin para Calendar ---
-@admin.register(Calendar)
-class CalendarAdmin(admin.ModelAdmin):
-    list_display = ("user", "timeZone", "firstDay", "get_events")
-    search_fields = ("user__username", "timeZone")
-    list_filter = ("timeZone", "firstDay")
+@admin.register(Advising)
+class AdvisingAdmin(admin.ModelAdmin):
+    list_display = ("title", "advisor", "startDateTime", "endDateTime", "location", "createdBy")
+    list_filter = ("status", "advisor")
+    search_fields = ("title", "description", "advisor__username")
+    ordering = ("startDateTime",)
+    date_hierarchy = "startDateTime"
 
-    def get_events(self, obj):
-        return ", ".join([e.title for e in obj.events.all()])
-    get_events.short_description = "Eventos"
+@admin.register(Event_recurrence)
+class EventRecurrenceAdmin(admin.ModelAdmin):
+    list_display = ("title", "recurrenceRule", "startDateTime", "endDateTime", "createdBy")
+    list_filter = ("recurrenceRule", "createdBy")
+    search_fields = ("title", "description")
+    ordering = ("startDateTime",)
+    date_hierarchy = "startDateTime"
+

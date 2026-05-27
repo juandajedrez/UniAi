@@ -1,0 +1,23 @@
+{% extends "home.html" %}
+{% block title %}Solicitar Asesoría{% endblock %}
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Seccion del titulo -->
+  <div class="card shadow">
+    <div class="card-header bg-success text-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2>Solicitar Asesoría</h2>
+            <a href="{% url 'user_advisings' %}" class="btn btn-danger">Cancelar</a>
+        </div>
+    </div>
+  </div>
+
+  <!-- Formulario de solicitud -->
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Enviar solicitud</button>
+  </form>
+</div>
+{% endblock %}
